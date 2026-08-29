@@ -7,7 +7,8 @@ project, and generate a ready-to-send inquiry — citing the exact UES reference
 numbers utility program staff use — to kick off the paperwork **before** the
 project starts.
 
-Live preview artifact: https://claude.ai/code/artifact/61cbfc65-c645-4f3f-8d35-d37136a8a7c9
+**Live site:** https://run206.github.io/wattsavailable/
+Preview artifact: https://claude.ai/code/artifact/61cbfc65-c645-4f3f-8d35-d37136a8a7c9
 
 ## How it works
 
@@ -36,15 +37,22 @@ python3 -m http.server 8742
 (Opening index.html directly via file:// also works in most browsers since the
 data is a plain script file, not a fetch.)
 
-## Refresh the data (each April / October)
+## Data refresh (automatic)
+
+A GitHub Action (`.github/workflows/update-data.yml`) checks bpa.gov every
+Monday and commits refreshed data whenever the published UES Measures List
+changes (April and October updates, plus mid-cycle corrections). GitHub Pages
+redeploys on push, so the live site updates itself. You can also trigger it
+manually from the repo's Actions tab ("Run workflow"), or run it locally:
 
 ```bash
 pip3 install openpyxl   # once
 python3 tools/update_data.py --version "October 2026" --effective 2026-10-01
 ```
 
-Then reload the site locally, spot-check a few measures against the official
-list, and redeploy.
+Note: GitHub disables scheduled workflows after ~60 days with no repo
+activity — a push or a manual workflow run re-enables them. After each
+April/October refresh, spot-check a few measures against the official list.
 
 ## Deploy
 

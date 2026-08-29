@@ -539,7 +539,15 @@ function zipZone(z){
   return null;
 }
 function zipUtils(z){
-  return UTIL_DIR.filter(u => (u.zips||[]).some(([lo,hi]) => z >= lo && z <= hi));
+  // narrower (more specific) matching ranges rank first
+  return UTIL_DIR
+    .map(u => {
+      const r = (u.zips||[]).find(([lo,hi]) => z >= lo && z <= hi);
+      return r ? {u, w: r[1]-r[0]} : null;
+    })
+    .filter(Boolean)
+    .sort((a,b) => a.w - b.w)
+    .map(x => x.u);
 }
 
 /* Plain-language project cards: label, one-line description, membership test */
