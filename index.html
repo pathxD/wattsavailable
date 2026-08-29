@@ -1,6 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <title>WattsAvailable</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Find the BPA/UES energy-efficiency incentives your Northwest utility may offer — insulation, heat pumps, windows, water heaters and more. Estimate your incentive and send a ready-to-go request to your utility's energy advisors before you start the work.">
+<meta property="og:title" content="WattsAvailable — your utility may help pay for your energy project">
+<meta property="og:description" content="1,100+ BPA/UES energy-efficiency measures for Pacific Northwest homes, businesses and farms. Match your project, estimate the incentive, contact your utility.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0E606C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
 <style>
@@ -218,7 +227,8 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
   .outbox{max-height:none;border:none}
 }
 </style>
-
+</head>
+<body>
 <div class="indep">Independent community guide — <b>not</b> affiliated with the Bonneville Power Administration or any utility. Final incentives are always set by your utility.</div>
 <header class="topbar">
   <div class="wrap">
@@ -295,9 +305,9 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
     </div>
     <div class="fieldrow">
       <div class="field" style="flex:2">
-        <label>Winter climate (BPA heating zone)</label>
+        <label>Winter climate (BPA heating zone) <span id="zone-note" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--good)"></span></label>
         <div class="seg" id="zone-seg" role="group" aria-label="Heating zone"></div>
-        <p class="zonehelp"><b>Zone 1</b> — milder winters: Puget Sound, Portland metro, Willamette Valley, the coast. <b>Zone 2</b> — colder: Central &amp; Eastern Washington and Oregon, Southern Idaho. <b>Zone 3</b> — coldest: Montana, high-elevation and mountain communities.</p>
+        <p class="zonehelp" id="zone-help"><b>Zone 1</b> — milder winters: Puget Sound, Portland metro, Willamette Valley, the coast. <b>Zone 2</b> — colder: Central &amp; Eastern Washington and Oregon, Southern Idaho. <b>Zone 3</b> — coldest: Montana, high-elevation and mountain communities.</p>
       </div>
     </div>
     <label class="check" id="iq-row">
@@ -331,7 +341,7 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
   <div class="panel">
     <div class="panel-head"><span class="stepnum">STEP 3</span><h2>Matching measures &amp; your estimate</h2></div>
     <p class="hint">Dollar figures are <b>BPA’s reference payment to your utility</b> per unit installed — a strong signal of what your utility’s rebate could look like, not a guarantee. Enter your project size and add measures to build an estimate.</p>
-    <div id="results"><p class="results-empty">Choose a project type above to see matching measures.</p></div>
+    <div id="results" aria-live="polite"><p class="results-empty">Choose a project type above to see matching measures.</p></div>
   </div>
 
   <div class="panel" id="step4">
@@ -601,7 +611,7 @@ const QUOTE_SYNONYMS = [
 ];
 
 /* ---------------- state ---------------- */
-const state = { sector:"Residential", bldg:"any", zone:"HZ1", vint:"existing", iq:false, techs:new Set(), search:"", shown:{}, sqft:null };
+const state = { sector:"Residential", bldg:"any", zone:"HZ1", vint:"existing", iq:false, techs:new Set(), search:"", shown:{}, sqft:null, zoneAuto:false };
 const cart = new Map(); // id -> {m, qty}
 
 /* ---------------- helpers ---------------- */
@@ -682,11 +692,13 @@ function renderBldg(){
 function renderZones(){
   $("zone-seg").innerHTML = ZONES.map(z =>
     `<button type="button" aria-pressed="${z[0]===state.zone}" data-z="${z[0]}">${z[1]}</button>`).join("");
-  $("zone-seg").querySelectorAll("button").forEach(b => b.onclick = () => { state.zone = b.dataset.z; update(); });
+  $("zone-seg").querySelectorAll("button").forEach(b => b.onclick = () => { state.zone = b.dataset.z; state.zoneAuto = false; update(); });
+  $("zone-note").textContent = state.zoneAuto ? "· set from your ZIP — change it if that looks wrong" : "";
+  $("zone-help").style.display = state.zoneAuto ? "none" : "";
 }
 
 /* ---------------- zip lookup ---------------- */
-function onZip(){
+function onZip(setZone){
   const raw = $("zip").value.trim();
   const out = $("zip-result");
   if (!/^\d{5}$/.test(raw)){
@@ -695,7 +707,7 @@ function onZip(){
   }
   const z = parseInt(raw, 10);
   const zone = zipZone(z);
-  if (zone && state.zone !== zone){ state.zone = zone; }
+  if (setZone !== false && zone){ state.zone = zone; state.zoneAuto = true; }
   const cands = zipUtils(z);
   const zoneTxt = zone ? `Climate set to <b>Heating ${zone.replace("HZ","Zone ")}</b> (change below if that looks wrong).` : "";
   if (!cands.length){
@@ -926,7 +938,7 @@ function buildSummary(){
   const bldg = (BLDG_OPTS[state.sector].find(o=>o[0]===state.bldg)||["","—"])[1];
   const L = [];
   L.push("ENERGY EFFICIENCY PROJECT INQUIRY");
-  L.push("Prepared with WattsAvailable · " + new Date().toLocaleDateString("en-US") + "\n");
+  L.push("Prepared with WattsAvailable (https://pathxd.github.io/wattsavailable/) · " + new Date().toLocaleDateString("en-US") + "\n");
   L.push("Hello — I'm a customer interested in starting an energy-efficiency project.");
   L.push("I have NOT started any work, and I understand utility approval comes first.\n");
   L.push("CUSTOMER");
@@ -1006,14 +1018,46 @@ $("zip").oninput = () => { clearTimeout(zipTimer); zipTimer = setTimeout(onZip, 
 $("qmatch").onclick = matchQuote;
 $("f-util").oninput = () => renderRoute();
 
+/* Shareable permalink: the estimator's state lives in the URL hash */
+function saveHash(){
+  try{
+    const p = new URLSearchParams();
+    if (state.sector !== "Residential") p.set("s", state.sector);
+    if (state.bldg !== "any") p.set("b", state.bldg);
+    p.set("z", state.zone);
+    if (state.vint !== "existing") p.set("v", state.vint);
+    if (state.iq) p.set("iq", "1");
+    if (state.techs.size) p.set("t", [...state.techs].join("~"));
+    const zip = $("zip").value.trim();
+    if (/^\d{5}$/.test(zip)) p.set("zip", zip);
+    history.replaceState(null, "", "#" + p.toString());
+  }catch(e){}
+}
+function restoreFromHash(){
+  try{
+    if (!location.hash || location.hash.length < 2) return;
+    const p = new URLSearchParams(location.hash.slice(1));
+    if (p.get("s") && SECTORS.includes(p.get("s"))) state.sector = p.get("s");
+    if (p.get("b") && BLDG_OPTS[state.sector].some(o => o[0] === p.get("b"))) state.bldg = p.get("b");
+    if (p.get("z") && ZONES.some(z => z[0] === p.get("z"))) state.zone = p.get("z");
+    if (p.get("v") === "new") state.vint = "new"; $("vint-sel").value = state.vint;
+    state.iq = p.get("iq") === "1"; $("iq-check").checked = state.iq;
+    if (p.get("t")) p.get("t").split("~").forEach(t => state.techs.add(t));
+    if (/^\d{5}$/.test(p.get("zip") || "")){ $("zip").value = p.get("zip"); onZip(false); }
+  }catch(e){}
+}
+
 function update(){
   state.shown = {};
-  renderSectors(); renderBldg(); renderZones(); renderCards(); renderChips(); renderResults(); renderCart(); renderRoute();
+  renderSectors(); renderBldg(); renderZones(); renderCards(); renderChips(); renderResults(); renderCart(); renderRoute(); saveHash();
 }
 $("stat-count").textContent = META.count.toLocaleString();
 $("foot-count").textContent = META.count.toLocaleString() + " active, with published payments";
 $("foot-version").textContent = META.version + " list";
 renderUtils();
+restoreFromHash();
 update();
 })();
 </script>
+</body>
+</html>

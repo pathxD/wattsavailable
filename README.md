@@ -7,7 +7,7 @@ project, and generate a ready-to-send inquiry — citing the exact UES reference
 numbers utility program staff use — to kick off the paperwork **before** the
 project starts.
 
-**Live site:** https://run206.github.io/wattsavailable/
+**Live site:** https://pathxd.github.io/wattsavailable/
 Preview artifact: https://claude.ai/code/artifact/61cbfc65-c645-4f3f-8d35-d37136a8a7c9
 
 ## How it works
