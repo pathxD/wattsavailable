@@ -1,0 +1,35 @@
+# Checks bpa.gov weekly for a new UES Measures List and commits refreshed data
+# when the published spreadsheet changes (BPA updates it every April & October,
+# with occasional mid-cycle corrections). GitHub Pages redeploys automatically
+# on push, so the live site updates itself with no manual steps.
+name: Update UES measures data
+
+on:
+  schedule:
+    - cron: "23 15 * * 1"   # every Monday 15:23 UTC (~7:23/8:23 AM Pacific)
+  workflow_dispatch: {}      # allows manual "Run workflow" from the Actions tab
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install openpyxl
+      - name: Regenerate measures data from bpa.gov
+        run: python tools/update_data.py
+      - name: Commit and push if the catalog changed
+        run: |
+          if git diff --quiet -- data/measures.js; then
+            echo "No catalog changes."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/measures.js
+            git commit -m "Auto-update UES measures data from bpa.gov"
+            git push
+          fi

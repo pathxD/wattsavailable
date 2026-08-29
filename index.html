@@ -1,0 +1,1011 @@
+<meta charset="utf-8">
+<title>WattsAvailable</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#F6F8F7; --card:#FFFFFF; --ink:#17282E; --ink-soft:#4C6068; --mist:#D9E3E1;
+  --river:#0E606C; --river-deep:#0A4650; --river-tint:#E3EEEF;
+  --kw:#A8690F; --kw-fill:#F4E3C8; --kw-strong:#D98E28;
+  --good:#2E6B44; --warn-bg:#FBF3E2; --warn-edge:#D9A94A;
+  --bar-bg:#0A4650; --bar-fg:#EAF4F3;
+  --shadow:0 1px 2px rgba(23,40,46,.06),0 6px 18px rgba(23,40,46,.07);
+  --radius:10px;
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D181B; --card:#132327; --ink:#DEEAE8; --ink-soft:#93AAA9; --mist:#24363A;
+    --river:#6CC3CE; --river-deep:#9AD8E0; --river-tint:#15292E;
+    --kw:#E8A94A; --kw-fill:#2E2410; --kw-strong:#E8A94A;
+    --good:#7FC397; --warn-bg:#241D0E; --warn-edge:#8A6A2A;
+    --bar-bg:#1B3138; --bar-fg:#DEEAE8;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D181B; --card:#132327; --ink:#DEEAE8; --ink-soft:#93AAA9; --mist:#24363A;
+  --river:#6CC3CE; --river-deep:#9AD8E0; --river-tint:#15292E;
+  --kw:#E8A94A; --kw-fill:#2E2410; --kw-strong:#E8A94A;
+  --good:#7FC397; --warn-bg:#241D0E; --warn-edge:#8A6A2A;
+  --bar-bg:#1B3138; --bar-fg:#DEEAE8;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{transition:none!important;animation:none!important} }
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 "Public Sans",system-ui,-apple-system,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Public Sans",system-ui,sans-serif;line-height:1.12;text-wrap:balance;margin:0}
+a{color:var(--river);text-underline-offset:2px}
+a:hover{color:var(--river-deep)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--river);outline-offset:2px}
+.mono{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--river)}
+
+/* ---------- top bar ---------- */
+.topbar{border-bottom:1px solid var(--mist);background:var(--card)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px}
+.brand{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:20px;color:var(--ink);text-decoration:none;display:flex;align-items:baseline;gap:2px}
+.brand .bolt{color:var(--kw-strong)}
+.topnav{display:flex;gap:20px;font-size:14px;font-weight:500}
+.topnav a{text-decoration:none;color:var(--ink-soft)}
+.topnav a:hover{color:var(--river)}
+@media(max-width:640px){.topnav{display:none}}
+.indep{background:var(--river-deep);color:#EAF4F3;font-size:12.5px;text-align:center;padding:6px 16px}
+:root[data-theme="dark"] .indep, :root:not([data-theme="light"]) .indep{color:var(--paper)}
+.indep b{font-weight:600}
+
+/* ---------- hero ---------- */
+.hero{padding:64px 0 40px;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(32px,5.2vw,54px);font-weight:700;max-width:17ch}
+.hero .lede{max-width:62ch;color:var(--ink-soft);font-size:17.5px;margin:18px 0 26px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:8px;border:1px solid transparent;padding:12px 22px;font-weight:600;font-size:15.5px;text-decoration:none;transition:background .15s,transform .1s}
+.btn-primary{background:var(--river);color:#fff}
+:root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary{color:#0D181B}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .btn-primary{color:#fff} }
+.btn-primary:hover{background:var(--river-deep)}
+.btn-ghost{background:transparent;color:var(--river);border-color:var(--mist)}
+.btn-ghost:hover{background:var(--river-tint)}
+.stats{display:flex;gap:36px;flex-wrap:wrap;margin-top:44px;padding-top:24px;border-top:1px solid var(--mist)}
+.stat b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:26px;font-weight:700;color:var(--ink)}
+.stat span{font-size:13.5px;color:var(--ink-soft)}
+.watermark{position:absolute;right:-40px;top:10px;width:340px;height:340px;opacity:.5;pointer-events:none}
+@media(max-width:860px){.watermark{display:none}}
+
+/* ---------- estimator ---------- */
+.estimator{padding:24px 0 40px}
+.panel{background:var(--card);border:1px solid var(--mist);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 28px;margin-bottom:22px}
+.panel-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+.stepnum{font-family:"Spline Sans Mono",monospace;font-size:13px;font-weight:600;color:var(--kw);background:var(--kw-fill);border-radius:20px;padding:3px 11px;white-space:nowrap}
+.panel h2{font-size:22px;font-weight:600}
+.panel .hint{color:var(--ink-soft);font-size:14.5px;margin:4px 0 18px;max-width:70ch}
+.fieldrow{display:flex;gap:28px;flex-wrap:wrap;margin-top:18px}
+.field{min-width:220px;flex:1}
+.field>label{display:block;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+select,input[type=text],input[type=email],input[type=tel],input[type=number],input[type=search],textarea{
+  width:100%;background:var(--paper);color:var(--ink);border:1px solid var(--mist);border-radius:8px;padding:10px 12px;font:inherit;font-size:15px}
+textarea{resize:vertical}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{background:var(--paper);border:1px solid var(--mist);border-radius:8px;padding:9px 16px;font-size:14.5px;font-weight:500;color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--river);border-color:var(--river);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"], :root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#0D181B}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .seg button[aria-pressed="true"]{color:#fff} }
+.seg button .n{font-size:12px;opacity:.75;margin-left:6px}
+.zonehelp{font-size:13.5px;color:var(--ink-soft);margin-top:8px;max-width:75ch}
+.check{display:flex;align-items:flex-start;gap:10px;margin-top:16px;font-size:14.5px;max-width:70ch}
+.check input{width:17px;height:17px;margin-top:2px;accent-color:var(--river)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{background:var(--paper);border:1px solid var(--mist);border-radius:100px;padding:7px 15px;font-size:14px;color:var(--ink)}
+.chips button:hover{border-color:var(--river)}
+.chips button[aria-pressed="true"]{background:var(--river-tint);border-color:var(--river);color:var(--river-deep);font-weight:600}
+.euhead{font-size:12.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 2px}
+.searchrow{margin-top:6px}
+
+/* zip lookup */
+.ziphint{font-size:14px;color:var(--ink-soft);padding-top:4px;max-width:70ch}
+.zipcard{background:var(--river-tint);border:1px solid var(--river);border-radius:8px;padding:12px 14px;font-size:14px}
+.zipcard b{color:var(--river-deep)}
+.zipcard.iou{background:var(--warn-bg);border-color:var(--warn-edge)}
+.zipcard .gas{display:block;margin-top:6px;font-size:12.5px;color:var(--ink-soft)}
+
+/* project cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;margin-top:14px}
+.card-btn{background:var(--paper);border:1px solid var(--mist);border-radius:10px;padding:14px 16px;text-align:left;color:var(--ink)}
+.card-btn:hover{border-color:var(--river)}
+.card-btn[aria-pressed="true"]{background:var(--river-tint);border-color:var(--river);box-shadow:inset 0 0 0 1px var(--river)}
+.card-btn b{display:block;font-size:15px;margin-bottom:3px}
+.card-btn span{font-size:12.5px;color:var(--ink-soft)}
+.card-btn .cn{float:right;font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--kw)}
+.advbox{margin-top:16px}
+.advbox>div{padding:4px 18px 16px}
+.qbox textarea{margin-bottom:10px}
+.qresult{font-size:14px;margin-top:10px;color:var(--ink-soft);max-width:75ch}
+.qresult b{color:var(--good)}
+
+/* routing info */
+.route{background:var(--river-tint);border:1px solid var(--mist);border-radius:8px;padding:13px 16px;font-size:14px;margin-top:14px;max-width:78ch}
+.route.iou{background:var(--warn-bg);border-color:var(--warn-edge)}
+
+/* results */
+.results-empty{color:var(--ink-soft);font-size:15px;padding:16px 0 4px}
+.rgroup{margin-top:26px}
+.rgroup>h3{font-size:17.5px;font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--mist);display:flex;justify-content:space-between;align-items:baseline}
+.rgroup>h3 span{font-size:13px;color:var(--ink-soft);font-weight:400}
+.mrow{display:flex;gap:18px;padding:16px 0;border-bottom:1px solid var(--mist);align-items:flex-start;flex-wrap:wrap}
+.mrow:last-child{border-bottom:none}
+.minfo{flex:1;min-width:260px}
+.mref{font-size:12.5px;color:var(--river);font-weight:500}
+.mname{font-weight:600;font-size:15.5px;margin:3px 0 2px}
+.mdetail{font-size:13.5px;color:var(--ink-soft);max-width:72ch}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.badge{font-size:11.5px;font-weight:600;letter-spacing:.03em;border-radius:4px;padding:2px 8px;background:var(--river-tint);color:var(--river-deep)}
+.badge.iq{background:var(--kw-fill);color:var(--kw)}
+.mact{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-left:auto}
+.mrow input.qty{width:96px}
+.mpay{text-align:right;min-width:110px}
+.mpay b{display:block;font-family:"Spline Sans Mono",monospace;font-size:19px;font-weight:600;color:var(--kw)}
+.mpay span{font-size:12px;color:var(--ink-soft)}
+.qty{width:86px}
+.addbtn{background:var(--river);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:600;font-size:14px}
+:root[data-theme="dark"] .addbtn, :root:not([data-theme="light"]) .addbtn{color:#0D181B}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .addbtn{color:#fff} }
+.addbtn:hover{background:var(--river-deep)}
+.addbtn[disabled]{background:var(--good);cursor:default}
+.morebtn{margin-top:16px;background:none;border:1px solid var(--mist);border-radius:8px;padding:9px 18px;color:var(--river);font-weight:600;font-size:14px}
+
+/* sticky estimate bar */
+.cartbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar-bg);color:var(--bar-fg);border-top:1px solid var(--mist);box-shadow:0 -4px 16px rgba(0,0,0,.18);transform:translateY(110%);transition:transform .25s;z-index:50}
+.cartbar.show{transform:none}
+.cartbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 20px;flex-wrap:wrap}
+.cartbar .sum b{font-family:"Spline Sans Mono",monospace;font-size:20px;color:var(--kw-strong)}
+.cartbar .sum{font-size:14px}
+.cartbar .btn-primary{background:var(--kw-strong);color:#1E1503}
+.cartbar .btn-primary:hover{background:#E8A94A}
+body.has-cart{padding-bottom:76px}
+
+/* cart list inside step 4 */
+.cartlist{border:1px solid var(--mist);border-radius:8px;overflow:hidden;margin:14px 0}
+.cartlist table{width:100%;border-collapse:collapse;font-size:14px}
+.cartlist th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;text-align:left;color:var(--ink-soft);background:var(--paper);padding:9px 12px;border-bottom:1px solid var(--mist)}
+.cartlist td{padding:10px 12px;border-bottom:1px solid var(--mist);vertical-align:top}
+.cartlist tr:last-child td{border-bottom:none}
+.cartlist .num{text-align:right;font-family:"Spline Sans Mono",monospace}
+.cartlist .rm{background:none;border:none;color:var(--ink-soft);font-size:16px;line-height:1;padding:2px 6px}
+.cartlist .rm:hover{color:#B4463C}
+.totline{display:flex;justify-content:space-between;gap:14px;font-weight:600;padding:4px 2px;font-size:15px}
+.totline .mono{color:var(--kw)}
+
+/* summary output */
+.callout{background:var(--warn-bg);border-left:4px solid var(--warn-edge);border-radius:6px;padding:13px 16px;font-size:14px;margin:16px 0;max-width:78ch}
+.outbox{background:var(--paper);border:1px solid var(--mist);border-radius:8px;padding:18px;white-space:pre-wrap;font-family:"Spline Sans Mono",monospace;font-size:12.5px;line-height:1.5;max-height:420px;overflow:auto;margin-top:14px}
+.outacts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* ---------- info sections ---------- */
+section.info{padding:44px 0}
+section.info h2{font-size:clamp(24px,3.4vw,32px);font-weight:700;margin-bottom:8px}
+section.info .sub{color:var(--ink-soft);max-width:66ch;margin-bottom:28px}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.flowcard{background:var(--card);border:1px solid var(--mist);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.flowcard .fnum{font-family:"Spline Sans Mono",monospace;font-size:13px;font-weight:600;color:var(--kw)}
+.flowcard h3{font-size:17px;font-weight:600;margin:6px 0 8px}
+.flowcard p{font-size:14px;color:var(--ink-soft);margin:0}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.rules .flowcard{border-top:3px solid var(--river)}
+.util-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.util{background:var(--card);border:1px solid var(--mist);border-radius:8px;padding:14px 16px;font-size:14px}
+.util a{font-weight:600;text-decoration:none}
+.util span{display:block;color:var(--ink-soft);font-size:12.5px;margin-top:2px}
+details{background:var(--card);border:1px solid var(--mist);border-radius:8px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600;padding:15px 18px;font-size:15px;list-style-position:inside}
+details p{padding:0 18px 16px;margin:0;color:var(--ink-soft);font-size:14.5px;max-width:80ch}
+details a{color:var(--river)}
+
+/* footer */
+footer{border-top:1px solid var(--mist);margin-top:30px;padding:34px 0 90px;font-size:13.5px;color:var(--ink-soft)}
+footer .cols{display:flex;gap:48px;flex-wrap:wrap}
+footer h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink);margin:0 0 10px}
+footer ul{list-style:none;margin:0;padding:0}
+footer li{margin-bottom:7px}
+footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);max-width:90ch}
+
+@media print{
+  .topbar,.indep,.hero,.estimator .panel:not(#step4),.cartbar,section.info,footer,.outacts,#leadform{display:none!important}
+  body{background:#fff;color:#000}
+  .outbox{max-height:none;border:none}
+}
+</style>
+
+<div class="indep">Independent community guide — <b>not</b> affiliated with the Bonneville Power Administration or any utility. Final incentives are always set by your utility.</div>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="bolt">⚡</span>WattsAvailable</a>
+    <nav class="topnav">
+      <a href="#estimator">Estimator</a>
+      <a href="#how">How it works</a>
+      <a href="#utilities">Find your utility</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="wrap">
+    <svg class="watermark" viewBox="0 0 200 200" aria-hidden="true">
+      <g fill="none" stroke="var(--river)" stroke-width="1.5" opacity=".35">
+        <path d="M10 150 Q60 120 100 140 T190 130"/>
+        <path d="M10 165 Q60 135 100 155 T190 145"/>
+        <path d="M10 180 Q60 150 100 170 T190 160"/>
+      </g>
+      <g stroke="var(--kw-strong)" stroke-width="2" fill="none" opacity=".55">
+        <path d="M105 20 L85 75 L105 75 L80 130 L130 65 L108 65 L125 20 Z"/>
+      </g>
+    </svg>
+    <p class="eyebrow">Pacific Northwest · Built on public BPA data</p>
+    <h1>Your utility may help pay for your energy project.</h1>
+    <p class="lede">Utilities across the Northwest buy power from the Bonneville Power Administration — and with it, access to a regional catalog of energy-efficiency incentives covering insulation, heat pumps, water heaters, lighting and more. Most customers never hear about them. Describe your project below, see the measures it may qualify for, and hand your utility a ready-to-send request — <b>before</b> you start the work.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#estimator">See what's available for my project</a>
+      <a class="btn btn-ghost" href="#how">How the money flows</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b class="mono" id="stat-count">1,171</b><span>active UES measures (April 2026 list)</span></div>
+      <div class="stat"><b class="mono">$6,000</b><span>top per-unit payment (income-qualified heat pump)</span></div>
+      <div class="stat"><b class="mono">140+</b><span>NW utilities buy power from BPA</span></div>
+      <div class="stat"><b class="mono">2×/yr</b><span>catalog updates (April &amp; October)</span></div>
+    </div>
+  </div>
+</div>
+
+<main class="estimator wrap" id="estimator">
+
+  <div class="panel">
+    <div class="panel-head"><span class="stepnum">STEP 1</span><h2>Your building</h2></div>
+    <p class="hint">The catalog pays different amounts depending on who you are, what kind of building you have, and how cold your winters are.</p>
+    <div class="fieldrow">
+      <div class="field" style="max-width:200px">
+        <label for="zip">ZIP code</label>
+        <input type="text" id="zip" inputmode="numeric" maxlength="5" placeholder="e.g. 98118" autocomplete="postal-code">
+      </div>
+      <div class="field" style="flex:2.2">
+        <div class="ziphint" id="zip-result">Enter your ZIP and we'll suggest your electric utility and set your climate zone. (If you also have a natural-gas utility, note these incentives cover <b>electric</b> savings — your gas utility may run separate rebates.)</div>
+      </div>
+    </div>
+    <div class="fieldrow">
+      <div class="field" style="flex:2">
+        <label>I am a…</label>
+        <div class="seg" id="sector-seg" role="group" aria-label="Customer type"></div>
+      </div>
+    </div>
+    <div class="fieldrow">
+      <div class="field" id="bldg-field">
+        <label for="bldg-sel">Building type</label>
+        <select id="bldg-sel"></select>
+      </div>
+      <div class="field">
+        <label for="vint-sel">Building status</label>
+        <select id="vint-sel">
+          <option value="existing">Existing building (retrofit)</option>
+          <option value="new">New construction</option>
+        </select>
+      </div>
+    </div>
+    <div class="fieldrow">
+      <div class="field" style="flex:2">
+        <label>Winter climate (BPA heating zone)</label>
+        <div class="seg" id="zone-seg" role="group" aria-label="Heating zone"></div>
+        <p class="zonehelp"><b>Zone 1</b> — milder winters: Puget Sound, Portland metro, Willamette Valley, the coast. <b>Zone 2</b> — colder: Central &amp; Eastern Washington and Oregon, Southern Idaho. <b>Zone 3</b> — coldest: Montana, high-elevation and mountain communities.</p>
+      </div>
+    </div>
+    <label class="check" id="iq-row">
+      <input type="checkbox" id="iq-check">
+      <span><b>Show income-qualified offers too.</b> Many measures have higher payments for income-qualified households (each utility sets its own qualification rules — ask them).</span>
+    </label>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="stepnum">STEP 2</span><h2>Your project</h2></div>
+    <p class="hint">What do you want to do? Pick one or more — no jargon needed.</p>
+    <div class="cards" id="cards"></div>
+    <div class="field searchrow" style="margin-top:16px">
+      <input type="search" id="search" placeholder="Or search the catalog — “insulation”, “heat pump”, “windows”…" aria-label="Search measures">
+    </div>
+    <details class="advbox qbox">
+      <summary>Have a contractor quote or bid? Paste it and we'll match measures</summary>
+      <div>
+        <p class="hint" style="margin-top:10px">Paste the text of your quote (equipment names, model specs, square footage). We'll pick out the matching project types — right here in your browser; nothing is uploaded.</p>
+        <textarea id="qtext" rows="5" placeholder="e.g. Install 1x Mitsubishi ductless mini-split heat pump, single head… Blow attic insulation to R-49, approx. 1,200 sq ft…"></textarea>
+        <button class="btn btn-ghost" id="qmatch">Match my quote</button>
+        <div class="qresult" id="qresult"></div>
+      </div>
+    </details>
+    <details class="advbox">
+      <summary>Advanced: pick exact equipment types</summary>
+      <div id="tech-chips"></div>
+    </details>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="stepnum">STEP 3</span><h2>Matching measures &amp; your estimate</h2></div>
+    <p class="hint">Dollar figures are <b>BPA’s reference payment to your utility</b> per unit installed — a strong signal of what your utility’s rebate could look like, not a guarantee. Enter your project size and add measures to build an estimate.</p>
+    <div id="results"><p class="results-empty">Choose a project type above to see matching measures.</p></div>
+  </div>
+
+  <div class="panel" id="step4">
+    <div class="panel-head"><span class="stepnum">STEP 4</span><h2>Send it to your utility</h2></div>
+    <p class="hint">This builds a clean, paperwork-ready summary citing the exact UES reference numbers your utility’s energy-efficiency team works with. Everything stays in your browser until you send it yourself.</p>
+    <div id="cart-empty" class="results-empty">Add measures in Step 3 to build your request.</div>
+    <div id="cart-wrap" hidden>
+      <div class="cartlist"><table aria-label="Selected measures">
+        <thead><tr><th>UES Ref №</th><th>Measure</th><th style="text-align:right">Qty</th><th style="text-align:right">Ref. payment</th><th></th></tr></thead>
+        <tbody id="cart-body"></tbody>
+      </table></div>
+      <div class="totline"><span>Estimated BPA reference payment</span><span class="mono" id="cart-total">$0</span></div>
+      <div class="totline" style="font-weight:400;color:var(--ink-soft);font-size:13.5px"><span>Estimated energy saved · rough bill savings at 11¢/kWh</span><span class="mono" id="cart-kwh"></span></div>
+      <div class="callout"><b>Before you send:</b> incentive paperwork must be approved by your utility <b>before any work starts</b>. Your utility chooses which measures it offers and sets the final customer amount — it may also have better offers than what’s listed here.</div>
+      <form id="leadform" onsubmit="return false">
+        <div class="fieldrow">
+          <div class="field"><label for="f-name">Your name</label><input type="text" id="f-name" autocomplete="name"></div>
+          <div class="field"><label for="f-email">Email</label><input type="email" id="f-email" autocomplete="email"></div>
+          <div class="field"><label for="f-phone">Phone (optional)</label><input type="tel" id="f-phone" autocomplete="tel"></div>
+        </div>
+        <div class="fieldrow">
+          <div class="field"><label for="f-city">City / ZIP</label><input type="text" id="f-city" autocomplete="address-level2"></div>
+          <div class="field"><label for="f-util">Your electric utility</label><input type="text" id="f-util" list="util-list" placeholder="e.g. Seattle City Light"><datalist id="util-list"></datalist></div>
+        </div>
+        <div class="fieldrow">
+          <div class="field" style="flex:2"><label for="f-notes">Anything else about the project? (optional)</label><textarea id="f-notes" rows="3" placeholder="e.g. 1978 single-family home, electric baseboard heat, planning to insulate the attic this fall…"></textarea></div>
+        </div>
+      </form>
+      <div class="route" id="route-info" hidden></div>
+      <div class="outacts">
+        <button class="btn btn-primary" id="gen-btn">Build my utility request</button>
+      </div>
+      <div id="out-wrap" hidden>
+        <div class="outbox" id="outbox"></div>
+        <div class="outacts">
+          <button class="btn btn-primary" id="copy-btn">Copy to clipboard</button>
+          <a class="btn btn-ghost" id="mail-btn" href="#">Open in my email app</a>
+          <button class="btn btn-ghost" id="print-btn">Print / save as PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<section class="info" id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>How the money flows</h2>
+    <p class="sub">These incentives exist because saving a kilowatt-hour is cheaper than generating one. Your utility gets reimbursed for helping you use less — everyone’s bill benefits.</p>
+    <div class="flow">
+      <div class="flowcard"><span class="fnum">01</span><h3>You (or your contractor) contact your utility</h3><p>Before any work starts, you ask your utility’s energy-efficiency or energy-advisor team about your project, citing the measures you found here. They confirm what they offer and start the paperwork. Contractors often handle this step for customers.</p></div>
+      <div class="flowcard"><span class="fnum">02</span><h3>The project gets done and verified</h3><p>Once the paperwork is approved, you do the project. The utility verifies the installation — some measures need certified installers or specific documentation, which the catalog notes.</p></div>
+      <div class="flowcard"><span class="fnum">03</span><h3>BPA reimburses the utility, the utility pays you</h3><p>BPA pays your utility the catalog amount for verified savings. Your utility pays its rebate to you (or to your contractor, who may pass it through as a discount). BPA never pays end customers directly.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="info">
+  <div class="wrap">
+    <p class="eyebrow">The ground rules</p>
+    <h2>Three things to know before you start</h2>
+    <p class="sub"></p>
+    <div class="rules">
+      <div class="flowcard"><h3>Paperwork first, project second</h3><p>To receive an incentive, your utility must approve your application <b>before</b> the project begins. Work that has already started or finished generally can’t be incentivized. This is the single most common way customers lose money they qualified for.</p></div>
+      <div class="flowcard"><h3>Your utility makes the final call</h3><p>The UES catalog is a menu, not a mandate. Utilities choose which measures to offer and set their own customer-facing rebate amounts — sometimes lower than the BPA reference payment, sometimes higher, and sometimes through their own separate programs. Treat figures here as a conversation starter.</p></div>
+      <div class="flowcard"><h3>Deemed vs. custom projects</h3><p>The measures listed here are <b>“deemed”</b> — pre-calculated savings and payments for standard equipment. Bigger or unusual projects can run as <b>custom projects</b> instead, where incentives are calculated from your project’s actual engineering. When both could apply, your utility decides which path fits. Ask.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="info" id="utilities">
+  <div class="wrap">
+    <p class="eyebrow">Who to call</p>
+    <h2>Find your utility’s efficiency team</h2>
+    <p class="sub">More than 140 public utilities, PUDs, co-ops and municipal utilities across Washington, Oregon, Idaho, Montana and neighboring states buy power from BPA. Your utility’s name is on your electric bill. A few of the larger ones:</p>
+    <div class="util-grid" id="util-grid"></div>
+    <p style="font-size:13.5px;color:var(--ink-soft);margin-top:14px">Utility not listed? Search “<i>your utility name</i> + energy efficiency rebates” or call the number on your bill and ask for the <b>conservation / energy-efficiency department</b>. Note: investor-owned utilities such as Puget Sound Energy, Portland General Electric and Idaho Power run their own (often similar) rebate programs outside the BPA catalog.</p>
+  </div>
+</section>
+
+<section class="info" id="faq">
+  <div class="wrap">
+    <p class="eyebrow">FAQ</p>
+    <h2>Common questions</h2>
+    <p class="sub"></p>
+    <details><summary>What is BPA, and what is a “UES measure”?</summary><p>The Bonneville Power Administration is a federal agency that markets power from the Columbia River hydro system to Northwest utilities. To keep demand in check, it funds energy-efficiency work through those utilities. A <b>UES (Unit Energy Savings) measure</b> is a pre-approved efficiency upgrade — say, R-49 attic insulation in an electrically heated home — with agreed savings and an agreed payment per unit, published in BPA’s <a href="https://www.bpa.gov/energy-and-services/conservation/implementation-manual" target="_blank" rel="noopener">Implementation Manual</a> and UES Measures List.</p></details>
+    <details><summary>Is the dollar amount shown what I’ll get?</summary><p>Not exactly. It’s what BPA reimburses your utility per unit installed. Your utility sets the customer rebate — often similar, sometimes different, occasionally zero if they don’t offer that measure. That’s why the last step here is contacting them <i>before</i> you build anything.</p></details>
+    <details><summary>Why do payments depend on “heating zones”?</summary><p>A heat pump or attic insulation saves more electricity in Spokane than in Seattle, because winters are colder. BPA divides the region into three heating zones by climate severity; savings and payments scale with them.</p></details>
+    <details><summary>Do I apply, or does my contractor?</summary><p>Either. Many insulation, window and heat-pump contractors handle the utility paperwork routinely and pass the incentive through as a discount on your invoice. If a contractor claims an incentive on your behalf, ask to see the amount on the paperwork.</p></details>
+    <details><summary>My electricity comes from a utility that isn’t a BPA customer. Is this useless to me?</summary><p>Not useless — but the amounts won’t apply. Investor-owned utilities (Puget Sound Energy, PGE, Avista, Idaho Power, NorthWestern) run their own rebate programs, frequently covering the same equipment. The project list you build here is still a good checklist to bring them.</p></details>
+    <details><summary>What are the income-qualified amounts?</summary><p>Many measures carry substantially higher payments (e.g., up to $6,000 for a ductless heat pump) for income-qualified or low-income households, usually capped at actual project cost. Each utility manages its own qualification process, often with community-action agencies. If money is tight, always ask about these first — some cover nearly the entire project.</p></details>
+    <details><summary>How current is this data?</summary><p id="data-note">This site uses the BPA UES Measures List effective April 1, 2026, filtered to currently active measures with a published payment. The catalog updates every April and October; always confirm current figures with your utility or the <a href="https://www.bpa.gov/energy-and-services/conservation/implementation-manual" target="_blank" rel="noopener">official BPA page</a>.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Official sources</h4>
+        <ul>
+          <li><a href="https://www.bpa.gov/energy-and-services/conservation/implementation-manual" target="_blank" rel="noopener">BPA Implementation Manual</a></li>
+          <li><a href="https://www.bpa.gov/-/media/Aep/energy-efficiency/document-library/IM-April-2026-Final.pdf" target="_blank" rel="noopener">Implementation Manual — April 2026 (PDF)</a></li>
+          <li><a href="https://www.bpa.gov/-/media/Aep/energy-efficiency/document-library/beets-ues-measure-list.xlsx" target="_blank" rel="noopener">UES Measures List (Excel)</a></li>
+          <li><a href="https://www.bpa.gov/-/media/Aep/energy-efficiency/document-library/IM-Oct-26-Update-Announcement.pdf" target="_blank" rel="noopener">October 2026 Update Overview (PDF)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>About</h4>
+        <ul>
+          <li>Data version: <span class="mono" id="foot-version">April 2026</span></li>
+          <li>Measures shown: <span class="mono" id="foot-count"></span></li>
+          <li>No accounts. No tracking. Nothing leaves your browser.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">WattsAvailable is an independent informational tool and is not affiliated with, endorsed by, or acting on behalf of the Bonneville Power Administration or any electric utility. Figures shown are BPA reference payments to utilities under the Energy Conservation Implementation Manual and are provided for education and planning only; they are not offers, quotes, or guarantees of any rebate. Utilities independently decide which measures to offer and at what amount. Always obtain written approval from your utility before beginning any project.</p>
+  </div>
+</footer>
+
+<div class="cartbar" id="cartbar">
+  <div class="wrap">
+    <div class="sum"><span id="bar-n"></span> · est. BPA reference payment <b id="bar-total">$0</b></div>
+    <a class="btn btn-primary" href="#step4">Prepare my utility request ↓</a>
+  </div>
+</div>
+
+<script src="data/measures.js"></script>
+<script>
+(function(){
+"use strict";
+const DATA = window.UES_DATA || [];
+const META = window.UES_META || {version:"April 2026", count:DATA.length};
+
+/* ---------------- config ---------------- */
+const SECTORS = ["Residential","Commercial","Agricultural","Industrial"];
+const SECTOR_LABEL = {Residential:"Homeowner / renter", Commercial:"Business / building owner", Agricultural:"Farm / irrigator", Industrial:"Industrial facility"};
+const BLDG_OPTS = {
+  Residential: [
+    ["any","Any / not sure", null],
+    ["sf","Single-family home", ["Single Family","Any Residential","Any Residential (SF, MF or Manuf)"]],
+    ["mh","Manufactured home", ["Manufactured Home","Any Residential","Any Residential (SF, MF or Manuf)"]],
+    ["mflow","Multifamily — low-rise (1–3 stories)", ["Multifamily Low Rise","Multifamily","Any Residential","Any Residential (SF, MF or Manuf)"]],
+    ["mfhigh","Multifamily — mid/high-rise", ["Multifamily Mid/High Rise","Multifamily","Any Residential"]],
+  ],
+  Commercial: [
+    ["any","Any / not sure", null],
+    ["offs","Small office (<5,000 sq ft)", ["Small Office <5,000 sq ft","Office, Warehouse, or Other"]],
+    ["offm","Medium office (5,000–50,000 sq ft)", ["Medium Office 5,000 to 50,000 sq ft","Office, Warehouse, or Other"]],
+    ["ret","Retail store", ["Medium Retail 5000 - 50,000 sq ft","Large Retail 50,000 - 100,000 sq ft"]],
+    ["rest","Restaurant", ["Restaurant"]],
+    ["school","School (K-12)", ["School K-12"]],
+    ["hosp","Hospital / healthcare", ["Hospital"]],
+    ["lodg","Hotel / lodging", ["Lodging"]],
+    ["wh","Warehouse", ["Warehouse","Office, Warehouse, or Other"]],
+    ["oth","Other commercial", ["Other","Office, Warehouse, or Other"]],
+  ],
+  Agricultural: [["any","Any / not sure", null]],
+  Industrial: [["any","Any / not sure", null]],
+};
+const COM_COMMON = ["Any Commercial","Any Commercial Building",""];
+const RES_COMMON = [""];
+const ZONES = [["HZ1","Zone 1 · milder"],["HZ2","Zone 2 · colder"],["HZ3","Zone 3 · coldest"],["any","Not sure — show all"]];
+/* Utility directory. type: "bpa" = BPA customer utility; "iou" = investor-owned (own programs).
+   zips: [lo, hi] ranges — approximate; users are always told to confirm on their bill.
+   email/emailBiz: public energy-advisor / rebate inboxes (verified Aug 2026). */
+const UTIL_DIR = [
+  {name:"Seattle City Light", type:"bpa", region:"WA · municipal", url:"https://www.seattle.gov/city-light",
+   advisorUrl:"https://citylight.seattle.gov/energy-advisor-residential", advisorUrlBiz:"https://citylight.seattle.gov/energy-advisor-business",
+   email:"SCLEnergyAdvisor@seattle.gov", phone:"206-684-3800", zips:[[98101,98199]]},
+  {name:"Tacoma Power", type:"bpa", region:"WA · municipal", url:"https://www.mytpu.org",
+   advisorUrl:"https://www.mytpu.org/ways-to-save/", email:"rebates@tacoma.gov", emailBiz:"bizrebates@cityoftacoma.org",
+   phone:"253-502-8363", zips:[[98401,98499]]},
+  {name:"Snohomish County PUD", type:"bpa", region:"WA · PUD", url:"https://www.snopud.com",
+   advisorUrl:"https://www.snopud.com/save-energy/", phone:"425-783-1700 (Energy Hotline)",
+   zips:[[98012,98012],[98020,98021],[98026,98026],[98036,98037],[98043,98043],[98082,98082],[98087,98087],[98201,98297]]},
+  {name:"Clark Public Utilities", type:"bpa", region:"WA · PUD", url:"https://www.clarkpublicutilities.com",
+   advisorUrl:"https://www.clarkpublicutilities.com/residential-customers/contact-energy-counselor/", phone:"360-992-3355",
+   zips:[[98600,98699]]},
+  {name:"Cowlitz PUD", type:"bpa", region:"WA · PUD", url:"https://www.cowlitzpud.org",
+   zips:[[98616,98616],[98626,98626],[98632,98632],[98645,98645]]},
+  {name:"Benton PUD", type:"bpa", region:"WA · PUD", url:"https://www.bentonpud.org",
+   zips:[[99320,99320],[99336,99338],[99350,99353]]},
+  {name:"Franklin PUD", type:"bpa", region:"WA · PUD", url:"https://www.franklinpud.com", zips:[[99301,99302]]},
+  {name:"Eugene Water & Electric Board", type:"bpa", region:"OR · municipal", url:"https://www.eweb.org",
+   advisorUrl:"https://www.eweb.org/your-public-utility/contact-us", zips:[[97401,97405],[97408,97408]]},
+  {name:"Springfield Utility Board", type:"bpa", region:"OR · municipal", url:"https://www.subutil.com", zips:[[97477,97478]]},
+  {name:"Idaho Falls Power", type:"bpa", region:"ID · municipal", url:"https://www.idahofallsidaho.gov", zips:[[83401,83406]]},
+  {name:"Flathead Electric Cooperative", type:"bpa", region:"MT · co-op", url:"https://www.flatheadelectric.com", zips:[[59901,59937]]},
+  {name:"Puget Sound Energy", type:"iou", region:"WA · investor-owned", url:"https://www.pse.com",
+   advisorUrl:"https://www.pse.com/en/rebates/ask-advisor-form", zips:[[98001,98011],[98014,98019],[98022,98025],[98027,98035],[98038,98042],[98045,98077],[98092,98092],[98310,98394],[98501,98599]]},
+  {name:"Avista Utilities", type:"iou", region:"WA/ID · investor-owned", url:"https://www.myavista.com", zips:[[99201,99260]]},
+  {name:"Portland General Electric", type:"iou", region:"OR · investor-owned", url:"https://portlandgeneral.com", zips:[[97201,97299]]},
+  {name:"Idaho Power", type:"iou", region:"ID · investor-owned", url:"https://www.idahopower.com", zips:[[83701,83716]]},
+];
+function zipZone(z){
+  const p = Math.floor(z/100);
+  if (p >= 970 && p <= 975) return "HZ1";
+  if (p >= 976 && p <= 979) return "HZ2";
+  if (p >= 980 && p <= 986) return "HZ1";
+  if (p >= 988 && p <= 994) return "HZ2";
+  if (p === 834) return "HZ3";
+  if (p >= 830 && p <= 839) return "HZ2";
+  if (p >= 590 && p <= 599) return "HZ3";
+  return null;
+}
+function zipUtils(z){
+  return UTIL_DIR.filter(u => (u.zips||[]).some(([lo,hi]) => z >= lo && z <= hi));
+}
+
+/* Plain-language project cards: label, one-line description, membership test */
+const PROJECT_CARDS = [
+  ["insulate","Insulate & seal my building","Attic, wall, floor insulation · air & duct sealing · insulated doors",
+    m => ["Insulation","Air Sealing","Duct Sealing-Prescriptive","Duct Insulation","Door Sweeps"].includes(m.tech)],
+  ["hvac","Upgrade heating / cooling","Heat pumps (ducted, ductless, geothermal) · thermostats · HVAC controls",
+    m => m.eu === "HVAC" && m.cat.indexOf("HVAC System") === 0],
+  ["windows","Replace windows","New or secondary energy-efficient windows",
+    m => /Window/.test(m.tech)],
+  ["water","Upgrade water heating","Heat pump water heaters · hot-water saving devices",
+    m => m.eu === "Water Heating" && !/Clothes/.test(m.tech)],
+  ["appl","Appliances & laundry","Efficient clothes washers & dryers · plug loads",
+    m => /Clothes/.test(m.tech) || m.eu === "Electronics"],
+  ["light","Upgrade lighting","LED fixtures, lamps & lighting controls",
+    m => m.eu === "Lighting"],
+  ["fridge","Refrigeration","Case doors, motors & controls for commercial refrigeration",
+    m => m.eu === "Refrigeration"],
+  ["kitchen","Kitchen equipment","Commercial food-service equipment",
+    m => m.eu === "Food Preparation"],
+  ["motors","Motors, pumps & drives","Efficient motors · variable-speed drives · process loads",
+    m => m.eu === "Motors/Drives" || m.eu === "Process Loads"],
+  ["irr","Irrigation upgrades","Sprinkler hardware, gaskets, nozzles & system fixes",
+    m => m.eu === "Irrigation"],
+  ["whole","Whole building & other","Certified new homes · energy reports · everything else",
+    m => m.eu === "Whole Bldg/Meter Level" || /NEEM|New Homes|Home Energy Reports|EV Charger/.test(m.tech)],
+];
+
+/* Contractor-quote keyword matcher (runs entirely in the browser) */
+const QUOTE_SYNONYMS = [
+  [/attic|ceiling insul|blown[- ]in|batt|r-?\d{2}\s|insulat/i, ["Insulation"], "insulation"],
+  [/air[- ]seal|weatheriz|caulk/i, ["Air Sealing"], "air sealing"],
+  [/duct[- ]seal/i, ["Duct Sealing-Prescriptive"], "duct sealing"],
+  [/duct insul/i, ["Duct Insulation"], "duct insulation"],
+  [/mini[- ]?split|ductless/i, ["Ductless Heat Pumps"], "ductless heat pump"],
+  [/variable[- ]?speed|inverter/i, ["Variable-Speed Heat Pumps"], "variable-speed heat pump"],
+  [/heat pump water heater|hpwh|hybrid.{0,10}water heater/i, ["Heat Pump Water Heaters"], "heat pump water heater"],
+  [/geothermal|ground[- ]?source/i, ["Ground-Source Heat Pumps"], "ground-source heat pump"],
+  [/ptac|packaged terminal/i, ["Packaged Terminal Heat Pumps"], "packaged terminal heat pump"],
+  [/heat pump/i, ["Air-Source Heat Pumps","Ductless Heat Pumps","Variable-Speed Heat Pumps"], "heat pump"],
+  [/window|glazing|u-?factor/i, ["Windows","Secondary Windows"], "windows"],
+  [/thermostat/i, ["Thermostats"], "thermostat"],
+  [/clothes washer|washing machine/i, ["Clothes Washers"], "clothes washer"],
+  [/dryer/i, ["Clothes Dryers"], "clothes dryer"],
+  [/\bled\b|luminaire|lighting|fixture|lamp/i, ["Midstream Lighting"], "lighting"],
+  [/\bvfd\b|variable[- ]frequency/i, ["HVAC Control Improvements (VFD)","Motors/Drives Control Improvements (VFD)"], "variable-frequency drive"],
+  [/\bhrv\b|heat recovery/i, ["Heat Recovery Ventilators (HRV)"], "heat recovery ventilator"],
+  [/strip curtain/i, ["Strip Curtains"], "strip curtains"],
+  [/door sweep/i, ["Door Sweeps"], "door sweeps"],
+  [/water heater/i, ["Heat Pump Water Heaters"], "water heater"],
+];
+
+/* ---------------- state ---------------- */
+const state = { sector:"Residential", bldg:"any", zone:"HZ1", vint:"existing", iq:false, techs:new Set(), search:"", shown:{}, sqft:null };
+const cart = new Map(); // id -> {m, qty}
+
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function money(v){
+  if (v == null) return "—";
+  return "$" + (v < 10 && v % 1 ? v.toFixed(2) : Math.round(v).toLocaleString("en-US"));
+}
+function unitLabel(u){
+  if (!u) return "per unit";
+  u = u.trim().replace(/^per\s+/i,"")
+    .replace(/^Square feet of area insulated$/i,"sq ft insulated")
+    .replace(/^Square feet of window replaced$/i,"sq ft of window")
+    .replace(/^Square (foot|feet)$/i,"sq ft");
+  return "per " + u.charAt(0).toLowerCase() + u.slice(1);
+}
+function kwhBadge(m){
+  if (!m.kwh) return "";
+  const v = m.kwh < 10 ? m.kwh.toFixed(1) : Math.round(m.kwh).toLocaleString();
+  return `<span class="badge">~${v} kWh/yr saved ${esc(unitLabel(m.unit))}</span>`;
+}
+function qtyDefault(u){
+  u = (u||"").toLowerCase();
+  if (u.includes("square") && state.sqft) return state.sqft;
+  if (u.includes("window")) return 100;
+  if (u.includes("square")) return 500;
+  return 1;
+}
+function isIQ(m){ return /^(IQ|LI)/.test(m.mtype||""); }
+
+function bldgSet(){
+  const opt = BLDG_OPTS[state.sector].find(o => o[0] === state.bldg);
+  if (!opt || !opt[2]) return null;
+  const extra = state.sector === "Commercial" ? COM_COMMON : RES_COMMON;
+  return new Set(opt[2].concat(extra));
+}
+function baseMatch(m){
+  if (m.sec !== state.sector) return false;
+  if (state.zone !== "any" && m.hz !== "All" && m.hz !== state.zone) return false;
+  const bs = bldgSet();
+  if (bs && !bs.has(m.bldg)) return false;
+  if (state.vint === "existing"){
+    if (!(m.vint === "Existing" || m.vint === "New or Existing" || m.vint === "")) return false;
+  } else {
+    if (!(m.vint === "New" || m.vint === "New or Existing" || m.vint === "New Construction" || m.vint === "")) return false;
+  }
+  if (!state.iq && isIQ(m)) return false;
+  return true;
+}
+function pool(){ return DATA.filter(baseMatch); }
+function searchMatch(m, q){
+  return (m.tech+" "+m.cat+" "+m.eu+" "+m.k1+" "+m.k2+" "+m.k3+" "+m.k4+" "+m.eff).toLowerCase().includes(q);
+}
+function results(){
+  const p = pool();
+  const q = state.search.trim().toLowerCase();
+  if (!q && state.techs.size === 0) return null;
+  return p.filter(m => (state.techs.size && state.techs.has(m.tech)) || (q && searchMatch(m, q)));
+}
+
+/* ---------------- render: step 1 ---------------- */
+function renderSectors(){
+  const counts = {};
+  DATA.forEach(m => counts[m.sec] = (counts[m.sec]||0)+1);
+  $("sector-seg").innerHTML = SECTORS.map(s =>
+    `<button type="button" aria-pressed="${s===state.sector}" data-s="${s}">${SECTOR_LABEL[s]}<span class="n">${counts[s]||0}</span></button>`).join("");
+  $("sector-seg").querySelectorAll("button").forEach(b => b.onclick = () => {
+    state.sector = b.dataset.s; state.bldg = "any"; state.techs.clear(); update();
+  });
+}
+function renderBldg(){
+  const opts = BLDG_OPTS[state.sector];
+  $("bldg-field").style.display = opts.length > 1 ? "" : "none";
+  $("bldg-sel").innerHTML = opts.map(o => `<option value="${o[0]}" ${o[0]===state.bldg?"selected":""}>${esc(o[1])}</option>`).join("");
+  $("iq-row").style.display = state.sector === "Residential" ? "" : "none";
+}
+function renderZones(){
+  $("zone-seg").innerHTML = ZONES.map(z =>
+    `<button type="button" aria-pressed="${z[0]===state.zone}" data-z="${z[0]}">${z[1]}</button>`).join("");
+  $("zone-seg").querySelectorAll("button").forEach(b => b.onclick = () => { state.zone = b.dataset.z; update(); });
+}
+
+/* ---------------- zip lookup ---------------- */
+function onZip(){
+  const raw = $("zip").value.trim();
+  const out = $("zip-result");
+  if (!/^\d{5}$/.test(raw)){
+    if (raw.length) out.innerHTML = "Keep typing — 5 digits.";
+    return;
+  }
+  const z = parseInt(raw, 10);
+  const zone = zipZone(z);
+  if (zone && state.zone !== zone){ state.zone = zone; }
+  const cands = zipUtils(z);
+  const zoneTxt = zone ? `Climate set to <b>Heating ${zone.replace("HZ","Zone ")}</b> (change below if that looks wrong).` : "";
+  if (!cands.length){
+    out.innerHTML = `<div class="zipcard">We don't recognize that ZIP — check the utility name on your electric bill and type it in Step 4. ${zoneTxt}<span class="gas">Gas utility too? These incentives cover electric savings; your gas utility may run separate rebates.</span></div>`;
+  } else {
+    const bpa = cands.filter(u => u.type === "bpa");
+    const pick = bpa[0] || cands[0];
+    if (bpa.length) $("f-util").value = bpa[0].name;
+    const names = cands.map(u => `<b>${esc(u.name)}</b>`).join(" or ");
+    const iouNote = pick.type === "iou"
+      ? ` — an investor-owned utility that runs its <i>own</i> rebate programs outside the BPA catalog. The figures here won't apply directly, but your project list is still a great checklist to bring to <a href="${pick.advisorUrl || pick.url}" target="_blank" rel="noopener">their advisors</a>.`
+      : ` — a BPA customer utility, so the catalog below applies. ✓`;
+    out.innerHTML = `<div class="zipcard ${pick.type === "iou" ? "iou" : ""}">Your electric utility is likely ${names}${iouNote} Always confirm the name on your bill.${cands.length > 1 ? " (Some areas are served by more than one electric utility.)" : ""}<span class="gas">Gas utility too? These incentives cover electric savings; your gas utility may run separate rebates.</span></div>`;
+  }
+  update();
+}
+
+/* ---------------- render: project cards ---------------- */
+function cardTechs(card){
+  const test = card[3];
+  return new Set(pool().filter(test).map(m => m.tech));
+}
+function renderCards(){
+  const p = pool();
+  let html = "";
+  PROJECT_CARDS.forEach(card => {
+    const [key, label, desc, test] = card;
+    const n = p.filter(test).length;
+    if (!n) return;
+    const techs = cardTechs(card);
+    const pressed = techs.size > 0 && [...techs].every(t => state.techs.has(t));
+    html += `<button type="button" class="card-btn" aria-pressed="${pressed}" data-card="${key}"><b>${esc(label)}<span class="cn">${n}</span></b><span>${esc(desc)}</span></button>`;
+  });
+  $("cards").innerHTML = html;
+  $("cards").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const card = PROJECT_CARDS.find(c => c[0] === b.dataset.card);
+    const techs = cardTechs(card);
+    const pressed = [...techs].every(t => state.techs.has(t));
+    techs.forEach(t => pressed ? state.techs.delete(t) : state.techs.add(t));
+    update();
+  });
+}
+
+/* ---------------- quote matcher ---------------- */
+function matchQuote(){
+  const text = $("qtext").value;
+  const out = $("qresult");
+  if (text.trim().length < 10){ out.innerHTML = "Paste a bit more of the quote text first."; return; }
+  const avail = new Set(pool().map(m => m.tech));
+  const found = [], missed = [];
+  QUOTE_SYNONYMS.forEach(([re, techs, label]) => {
+    if (!re.test(text)) return;
+    const usable = techs.filter(t => avail.has(t));
+    if (usable.length){
+      if (!found.includes(label)) found.push(label);
+      usable.forEach(t => state.techs.add(t));
+    } else if (!missed.includes(label)) missed.push(label);
+  });
+  const sq = text.match(/([\d,]{2,7})\s*(?:sq\.?\s?-?\s?f(?:oo|ee)?t|sf\b|square\s+f)/i);
+  if (sq){
+    const v = parseInt(sq[1].replace(/,/g, ""), 10);
+    if (v >= 20 && v <= 100000) state.sqft = v;
+  }
+  let msg = "";
+  if (found.length) msg += `Matched: <b>${found.join(", ")}</b> — selected below, scroll to Step 3.`;
+  if (state.sqft) msg += ` Spotted <b>~${state.sqft.toLocaleString()} sq ft</b> — used as the starting quantity for area-based measures.`;
+  if (missed.length) msg += ` (Also saw ${missed.join(", ")}, but no active measure matches your current building/zone — try “Not sure” settings.)`;
+  if (!msg) msg = "No equipment keywords recognized — try the project cards above, or the search box.";
+  out.innerHTML = msg;
+  update();
+  out.innerHTML = msg; // update() re-renders panels but not this box; keep the message
+}
+
+/* ---------------- render: step 2 chips ---------------- */
+function renderChips(){
+  const p = pool();
+  const byEU = {};
+  p.forEach(m => {
+    byEU[m.eu] = byEU[m.eu] || {};
+    byEU[m.eu][m.tech] = (byEU[m.eu][m.tech]||0)+1;
+  });
+  // prune selected techs that vanished
+  const avail = new Set(p.map(m => m.tech));
+  [...state.techs].forEach(t => { if (!avail.has(t)) state.techs.delete(t); });
+  let html = "";
+  Object.keys(byEU).sort((a,b) => Object.keys(byEU[b]).length - Object.keys(byEU[a]).length).forEach(eu => {
+    const techs = Object.entries(byEU[eu]).sort((a,b) => b[1]-a[1]);
+    html += `<p class="euhead">${esc(eu)}</p><div class="chips">` +
+      techs.map(([t,n]) => `<button type="button" aria-pressed="${state.techs.has(t)}" data-t="${esc(t)}">${esc(t)}<span class="n"> ${n}</span></button>`).join("") + `</div>`;
+  });
+  $("tech-chips").innerHTML = html || `<p class="results-empty">No measures match this combination — try “Not sure” for zone or building type.</p>`;
+  $("tech-chips").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const t = b.dataset.t;
+    state.techs.has(t) ? state.techs.delete(t) : state.techs.add(t);
+    update();
+  });
+}
+
+/* ---------------- render: step 3 results ---------------- */
+function measureName(m){
+  const bits = [m.k2, m.k3, m.k4].filter(x => x && x !== "None");
+  return bits.length ? bits.join(" · ") : (m.k1 && m.k1 !== "None" ? m.k1 : m.cat);
+}
+function measureSub(m){
+  const bits = [];
+  if (m.k1 && m.k1 !== "None") bits.push(m.k1);
+  if (m.eff && m.eff !== "None") bits.push("Spec: " + m.eff);
+  if (m.base && m.base !== "None") bits.push("Replacing: " + m.base);
+  return bits.join(" — ");
+}
+const GROUP_LIMIT = 6;
+function renderResults(){
+  const r = results();
+  const el = $("results");
+  if (r === null){ el.innerHTML = `<p class="results-empty">Choose a project type above to see matching measures.</p>`; return; }
+  if (!r.length){ el.innerHTML = `<p class="results-empty">No matches for that search in your building/zone combination. Try broader terms, set zone to “Not sure”, or check the income-qualified box.</p>`; return; }
+  const groups = {};
+  r.forEach(m => (groups[m.tech] = groups[m.tech] || []).push(m));
+  let html = "";
+  Object.entries(groups).sort((a,b) => b[1].length - a[1].length).forEach(([tech, ms]) => {
+    ms.sort((a,b) => (b.pay||0) - (a.pay||0));
+    const key = tech.replace(/\W+/g,"_");
+    const lim = state.shown[key] ? ms.length : Math.min(ms.length, GROUP_LIMIT);
+    html += `<div class="rgroup"><h3>${esc(tech)} <span>${ms.length} variant${ms.length>1?"s":""} · ${esc(ms[0].eu)}</span></h3>`;
+    ms.slice(0, lim).forEach(m => {
+      const inCart = cart.has(m.id);
+      const badges = [];
+      if (isIQ(m)) badges.push(`<span class="badge iq">${m.mtype.startsWith("LI") ? "Low-income" : "Income-qualified"}</span>`);
+      if (m.hz !== "All") badges.push(`<span class="badge">${m.hz.replace("HZ","Heating zone ")}</span>`);
+      if (m.bldg && m.bldg !== "Non building measure") badges.push(`<span class="badge">${esc(m.bldg)}</span>`);
+      if (m.ptcs === "Yes") badges.push(`<span class="badge">Certified installer (PTCS)</span>`);
+      const kb = kwhBadge(m); if (kb) badges.push(kb);
+      html += `<div class="mrow">
+        <div class="minfo">
+          <div class="mref mono">${esc(m.id)}</div>
+          <div class="mname">${esc(measureName(m))}</div>
+          <div class="mdetail">${esc(measureSub(m))}</div>
+          <div class="badges">${badges.join("")}</div>
+        </div>
+        <div class="mact">
+          <div class="mpay"><b>${money(m.pay)}</b><span>${esc(unitLabel(m.unit))}</span></div>
+          <input class="qty mono" type="number" min="1" step="1" value="${cart.has(m.id) ? cart.get(m.id).qty : qtyDefault(m.unit)}" data-q="${esc(m.id)}" aria-label="Quantity for ${esc(m.id)}">
+          <button class="addbtn" data-add="${esc(m.id)}" ${inCart ? "disabled" : ""}>${inCart ? "Added ✓" : "Add"}</button>
+        </div>
+      </div>`;
+    });
+    if (ms.length > lim) html += `<button class="morebtn" data-more="${esc(key)}">Show all ${ms.length} variants</button>`;
+    html += `</div>`;
+  });
+  el.innerHTML = html;
+  el.querySelectorAll("[data-add]").forEach(b => b.onclick = () => {
+    const m = DATA.find(x => x.id === b.dataset.add);
+    const qEl = el.querySelector(`input[data-q="${CSS.escape(b.dataset.add)}"]`);
+    const qty = Math.max(1, parseInt(qEl && qEl.value || "1", 10) || 1);
+    cart.set(m.id, {m, qty});
+    update();
+  });
+  el.querySelectorAll("[data-more]").forEach(b => b.onclick = () => { state.shown[b.dataset.more] = true; renderResults(); });
+  el.querySelectorAll("input[data-q]").forEach(inp => inp.onchange = () => {
+    const id = inp.dataset.q;
+    if (cart.has(id)){ cart.get(id).qty = Math.max(1, parseInt(inp.value,10)||1); update(); }
+  });
+}
+
+/* ---------------- cart / step 4 ---------------- */
+function totals(){
+  let pay = 0, kwh = 0;
+  cart.forEach(({m, qty}) => { pay += (m.pay||0)*qty; kwh += (m.kwh||0)*qty; });
+  return {pay, kwh};
+}
+function renderCart(){
+  const has = cart.size > 0;
+  document.body.classList.toggle("has-cart", has);
+  $("cartbar").classList.toggle("show", has);
+  $("cart-empty").hidden = has;
+  $("cart-wrap").hidden = !has;
+  const t = totals();
+  $("bar-n").textContent = cart.size + " measure" + (cart.size===1?"":"s");
+  $("bar-total").textContent = money(t.pay);
+  if (!has) return;
+  $("cart-body").innerHTML = [...cart.values()].map(({m, qty}) => `
+    <tr>
+      <td class="mono">${esc(m.id)}</td>
+      <td><b>${esc(m.tech)}</b><br><span style="color:var(--ink-soft);font-size:12.5px">${esc(measureName(m))}</span></td>
+      <td class="num">${qty.toLocaleString()} <span style="color:var(--ink-soft);font-size:11px">${esc(unitLabel(m.unit)).replace("per ","× ")}</span></td>
+      <td class="num">${money((m.pay||0)*qty)}</td>
+      <td><button class="rm" data-rm="${esc(m.id)}" aria-label="Remove ${esc(m.id)}">✕</button></td>
+    </tr>`).join("");
+  $("cart-total").textContent = money(t.pay);
+  $("cart-kwh").textContent = "~" + Math.round(t.kwh).toLocaleString() + " kWh/yr · ~" + money(t.kwh*0.11) + "/yr";
+  $("cart-body").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { cart.delete(b.dataset.rm); update(); });
+}
+
+function findUtil(){
+  const q = $("f-util").value.trim().toLowerCase();
+  if (!q) return null;
+  return UTIL_DIR.find(u => u.name.toLowerCase() === q)
+      || UTIL_DIR.find(u => u.name.toLowerCase().includes(q) || q.includes(u.name.toLowerCase().split(" ")[0]) && q.length > 5) || null;
+}
+function utilEmail(u){
+  if (!u) return null;
+  return (state.sector !== "Residential" && u.emailBiz) ? u.emailBiz : (u.email || null);
+}
+function utilAdvisorUrl(u){
+  if (!u) return null;
+  return (state.sector !== "Residential" && u.advisorUrlBiz) ? u.advisorUrlBiz : (u.advisorUrl || u.url);
+}
+function renderRoute(){
+  const box = $("route-info");
+  const u = findUtil();
+  if (!u){ box.hidden = true; return; }
+  box.hidden = false;
+  box.className = "route" + (u.type === "iou" ? " iou" : "");
+  const em = utilEmail(u);
+  const parts = [];
+  if (u.type === "iou"){
+    parts.push(`<b>${esc(u.name)}</b> is investor-owned and runs its own rebate programs — the BPA figures here won't apply directly, but your request is still a useful project summary to send <a href="${utilAdvisorUrl(u)}" target="_blank" rel="noopener">their advisor team</a>.`);
+  } else {
+    parts.push(`Your request will be addressed to <b>${esc(u.name)}</b>'s energy-efficiency team${em ? ` (<span class="mono">${esc(em)}</span>)` : ""}.`);
+    if (u.phone) parts.push(`Prefer the phone? ${esc(u.phone)}.`);
+    if (u.advisorUrl || u.advisorUrlBiz) parts.push(`Or use their <a href="${utilAdvisorUrl(u)}" target="_blank" rel="noopener">energy-advisor contact page</a>.`);
+  }
+  box.innerHTML = parts.join(" ");
+}
+function buildSummary(){
+  const t = totals();
+  const zone = ZONES.find(z => z[0]===state.zone)[1].split(" ·")[0];
+  const bldg = (BLDG_OPTS[state.sector].find(o=>o[0]===state.bldg)||["","—"])[1];
+  const L = [];
+  L.push("ENERGY EFFICIENCY PROJECT INQUIRY");
+  L.push("Prepared with WattsAvailable · " + new Date().toLocaleDateString("en-US") + "\n");
+  L.push("Hello — I'm a customer interested in starting an energy-efficiency project.");
+  L.push("I have NOT started any work, and I understand utility approval comes first.\n");
+  L.push("CUSTOMER");
+  L.push("  Name:    " + ($("f-name").value || "—"));
+  L.push("  Email:   " + ($("f-email").value || "—"));
+  if ($("f-phone").value) L.push("  Phone:   " + $("f-phone").value);
+  L.push("  City/ZIP: " + ($("f-city").value || "—"));
+  L.push("  Utility: " + ($("f-util").value || "—") + "\n");
+  L.push("BUILDING");
+  L.push("  " + state.sector + " · " + bldg + " · " + (state.vint==="existing"?"Existing building":"New construction") + " · BPA Heating " + zone + "\n");
+  L.push("MEASURES OF INTEREST — per BPA UES Measures List (" + META.version + (META.effective ? ", effective " + META.effective : "") + ")");
+  let i = 1;
+  cart.forEach(({m, qty}) => {
+    L.push("  " + i++ + ". UES Ref: " + m.id + " — " + m.tech);
+    L.push("     " + measureName(m));
+    if (m.eff && m.eff !== "None") L.push("     Spec: " + m.eff);
+    L.push("     Est. quantity: " + qty.toLocaleString() + " (" + unitLabel(m.unit) + ")");
+    L.push("     BPA reference payment: " + money(m.pay) + " " + unitLabel(m.unit) + "  →  est. " + money((m.pay||0)*qty));
+    if (m.ptcs === "Yes") L.push("     Note: requires PTCS-certified installation");
+    if (m.forms) L.push("     Forms noted in catalog: " + m.forms);
+  });
+  L.push("");
+  L.push("  ESTIMATED TOTAL BPA REFERENCE PAYMENT: " + money(t.pay));
+  L.push("  Estimated savings: ~" + Math.round(t.kwh).toLocaleString() + " kWh/yr\n");
+  if ($("f-notes").value){ L.push("PROJECT NOTES"); L.push("  " + $("f-notes").value + "\n"); }
+  L.push("QUESTIONS FOR YOUR TEAM");
+  L.push("  1. Do you currently offer these measures (or equivalents), and at what customer rebate?");
+  L.push("  2. Would any of this be better handled as a custom project?");
+  L.push("  3. What paperwork do I need approved before work can begin?");
+  L.push("  4. Do you have a list of approved/certified contractors?\n");
+  L.push("Reference: BPA Energy Conservation Implementation Manual & UES Measures List");
+  L.push("https://www.bpa.gov/energy-and-services/conservation/implementation-manual");
+  L.push("Amounts above are BPA-to-utility reference payments, not customer quotes; I understand the final offer is determined by the utility.");
+  return L.join("\n");
+}
+$("gen-btn").onclick = () => {
+  const text = buildSummary();
+  $("outbox").textContent = text;
+  $("out-wrap").hidden = false;
+  const subj = "Energy efficiency project inquiry" + ($("f-name").value ? " — " + $("f-name").value : "");
+  const u = findUtil();
+  const em = (u && u.type === "bpa") ? utilEmail(u) : null;
+  $("mail-btn").href = "mailto:" + (em ? encodeURIComponent(em) : "") + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(text);
+  $("mail-btn").textContent = em ? ("Email " + u.name) : "Open in my email app";
+  renderRoute();
+  $("out-wrap").scrollIntoView({behavior:"smooth", block:"nearest"});
+};
+$("copy-btn").onclick = async () => {
+  try { await navigator.clipboard.writeText($("outbox").textContent); $("copy-btn").textContent = "Copied ✓"; }
+  catch(e){
+    const r = document.createRange(); r.selectNodeContents($("outbox"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    $("copy-btn").textContent = "Press ⌘/Ctrl+C to copy";
+  }
+  setTimeout(() => $("copy-btn").textContent = "Copy to clipboard", 2500);
+};
+$("print-btn").onclick = () => window.print();
+
+/* ---------------- static renders ---------------- */
+function renderUtils(){
+  const bpa = UTIL_DIR.filter(u => u.type === "bpa");
+  $("util-grid").innerHTML = bpa.map(u => {
+    const contact = [u.email ? `<span class="mono">${esc(u.email)}</span>` : "", u.phone ? esc(u.phone) : ""].filter(Boolean).join(" · ");
+    return `<div class="util"><a href="${u.advisorUrl || u.url}" target="_blank" rel="noopener">${esc(u.name)}</a><span>${esc(u.region)}${contact ? " · " + contact : ""}</span></div>`;
+  }).join("");
+  $("util-list").innerHTML = UTIL_DIR.map(u => `<option value="${esc(u.name)}">`).join("");
+}
+
+/* ---------------- events & init ---------------- */
+$("bldg-sel").onchange = e => { state.bldg = e.target.value; update(); };
+$("vint-sel").onchange = e => { state.vint = e.target.value; update(); };
+$("iq-check").onchange = e => { state.iq = e.target.checked; update(); };
+let searchTimer;
+$("search").oninput = e => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { state.search = e.target.value; renderResults(); }, 200); };
+let zipTimer;
+$("zip").oninput = () => { clearTimeout(zipTimer); zipTimer = setTimeout(onZip, 300); };
+$("qmatch").onclick = matchQuote;
+$("f-util").oninput = () => renderRoute();
+
+function update(){
+  state.shown = {};
+  renderSectors(); renderBldg(); renderZones(); renderCards(); renderChips(); renderResults(); renderCart(); renderRoute();
+}
+$("stat-count").textContent = META.count.toLocaleString();
+$("foot-count").textContent = META.count.toLocaleString() + " active, with published payments";
+$("foot-version").textContent = META.version + " list";
+renderUtils();
+update();
+})();
+</script>
