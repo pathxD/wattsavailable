@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WattsAvailable Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Answer a few quick questions and see what your Northwest utility might pay toward your insulation, heat pump, window or other energy project.">
+<meta name="theme-color" content="#0E606C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#F6F8F7; --card:#FFFFFF; --ink:#17282E; --ink-soft:#4C6068; --mist:#D9E3E1;
+  --river:#0E606C; --river-deep:#0A4650; --river-tint:#E3EEEF;
+  --kw:#A8690F; --kw-fill:#F4E3C8; --kw-strong:#D98E28;
+  --good:#2E6B44; --warn-bg:#FBF3E2; --warn-edge:#D9A94A;
+  --btn-fg:#FFFFFF;
+  --shadow:0 1px 2px rgba(23,40,46,.06),0 10px 30px rgba(23,40,46,.09);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D181B; --card:#132327; --ink:#DEEAE8; --ink-soft:#93AAA9; --mist:#24363A;
+    --river:#6CC3CE; --river-deep:#9AD8E0; --river-tint:#15292E;
+    --kw:#E8A94A; --kw-fill:#2E2410; --kw-strong:#E8A94A;
+    --good:#7FC397; --warn-bg:#241D0E; --warn-edge:#8A6A2A;
+    --btn-fg:#0D181B;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D181B; --card:#132327; --ink:#DEEAE8; --ink-soft:#93AAA9; --mist:#24363A;
+  --river:#6CC3CE; --river-deep:#9AD8E0; --river-tint:#15292E;
+  --kw:#E8A94A; --kw-fill:#2E2410; --kw-strong:#E8A94A;
+  --good:#7FC397; --warn-bg:#241D0E; --warn-edge:#8A6A2A;
+  --btn-fg:#0D181B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 "Public Sans",system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+h1,h2{font-family:"Bricolage Grotesque","Public Sans",sans-serif;line-height:1.15;text-wrap:balance;margin:0}
+a{color:var(--river)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--river);outline-offset:2px}
+.mono{font-family:"Spline Sans Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;max-width:720px;margin:0 auto;width:100%}
+.brand{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:18px;color:var(--ink);text-decoration:none}
+.brand .bolt{color:var(--kw-strong)}
+.top a.alt{font-size:12.5px;color:var(--ink-soft);text-decoration:none}
+.top a.alt:hover{color:var(--river)}
+
+.progress{height:4px;background:var(--mist);border-radius:4px;overflow:hidden;max-width:680px;margin:0 auto;width:calc(100% - 40px)}
+.progress i{display:block;height:100%;background:var(--river);border-radius:4px;transition:width .3s;width:0}
+
+main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px 60px}
+.screen{background:var(--card);border:1px solid var(--mist);border-radius:14px;box-shadow:var(--shadow);padding:36px 34px;max-width:640px;width:100%;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.q-eyebrow{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--river);margin:0 0 10px}
+.screen h1{font-size:clamp(22px,4vw,30px);font-weight:700;margin-bottom:8px}
+.q-sub{color:var(--ink-soft);font-size:15px;margin:0 0 24px;max-width:56ch}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--paper);border:1.5px solid var(--mist);border-radius:10px;padding:15px 18px;text-align:left;font-size:16px;font-weight:500;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:10px;transition:border-color .12s}
+.opt:hover{border-color:var(--river)}
+.opt[aria-pressed="true"]{border-color:var(--river);background:var(--river-tint);box-shadow:inset 0 0 0 1px var(--river)}
+.opt small{color:var(--ink-soft);font-weight:400;font-size:13px;display:block;margin-top:2px}
+.opt .tick{color:var(--good);font-weight:700;visibility:hidden}
+.opt[aria-pressed="true"] .tick{visibility:visible}
+input[type=text],input[type=email],input[type=tel]{
+  width:100%;background:var(--paper);color:var(--ink);border:1.5px solid var(--mist);border-radius:10px;padding:14px 16px;font:inherit;font-size:18px}
+.bigzip{font-size:26px!important;letter-spacing:.15em;text-align:center;font-family:"Spline Sans Mono",monospace;max-width:240px;display:block;margin:0 auto}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+.next{background:var(--river);color:var(--btn-fg);border:none;border-radius:10px;padding:14px 30px;font-weight:700;font-size:16px}
+.next:hover{background:var(--river-deep)}
+.next[disabled]{opacity:.45;cursor:default}
+.back{background:none;border:none;color:var(--ink-soft);font-size:14px;padding:8px}
+.back:hover{color:var(--river)}
+.skip{background:none;border:none;color:var(--ink-soft);font-size:13.5px;text-decoration:underline;text-underline-offset:2px;padding:8px}
+.hintline{font-size:13.5px;color:var(--ink-soft);margin-top:14px;text-align:center}
+.notice{background:var(--river-tint);border:1px solid var(--mist);border-radius:10px;padding:13px 16px;font-size:14px;margin-top:16px}
+.notice.warn{background:var(--warn-bg);border-color:var(--warn-edge)}
+
+/* results */
+.total{font-family:"Bricolage Grotesque",sans-serif;font-size:clamp(38px,8vw,56px);font-weight:700;color:var(--kw);line-height:1}
+.total-cap{font-size:13.5px;color:var(--ink-soft);margin:6px 0 22px}
+.rrow{border-top:1px solid var(--mist);padding:14px 0}
+.rrow .rline{display:flex;justify-content:space-between;gap:14px;align-items:baseline}
+.rrow b{font-size:15.5px}
+.rrow .amt{font-family:"Spline Sans Mono",monospace;font-size:17px;font-weight:600;color:var(--kw);white-space:nowrap}
+.rrow .rdetail{font-size:13px;color:var(--ink-soft);margin-top:2px}
+.rrow .ref{color:var(--river);font-size:12px}
+details.vars{margin-top:6px}
+details.vars summary{font-size:12.5px;color:var(--ink-soft);cursor:pointer}
+details.vars li{font-size:12.5px;color:var(--ink-soft);margin:4px 0}
+.contactbox{background:var(--paper);border:1px solid var(--mist);border-radius:10px;padding:16px;margin-top:20px}
+.contactbox p{margin:0 0 10px;font-size:14px}
+.frow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.frow input{flex:1;min-width:160px;font-size:15px;padding:11px 13px}
+.actrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.ghost{background:none;border:1.5px solid var(--mist);color:var(--river);border-radius:10px;padding:12px 20px;font-weight:600;font-size:14.5px;text-decoration:none;display:inline-flex;align-items:center}
+.ghost:hover{background:var(--river-tint)}
+.outbox{background:var(--paper);border:1px solid var(--mist);border-radius:10px;padding:16px;white-space:pre-wrap;font-family:"Spline Sans Mono",monospace;font-size:12px;line-height:1.5;max-height:340px;overflow:auto;margin-top:16px}
+footer{text-align:center;font-size:12px;color:var(--ink-soft);padding:0 20px 26px;max-width:640px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="brand" href="./"><span class="bolt">⚡</span>WattsAvailable</a>
+  <a class="alt" href="../">Prefer the full detailed version? →</a>
+</div>
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+<main><div class="screen" id="screen"></div></main>
+<footer>Independent guide — not affiliated with BPA or any utility. Amounts are BPA reference payments to utilities, not quotes; your utility sets final rebates. Never start work before your utility approves the paperwork.</footer>
+
+<script src="../data/measures.js"></script>
+<script>
+(function(){
+"use strict";
+const DATA = window.UES_DATA || [];
+const META = window.UES_META || {version:"April 2026"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money = v => v == null ? "—" : "$" + (v < 10 && v % 1 ? v.toFixed(2) : Math.round(v).toLocaleString("en-US"));
+
+/* ---- shared reference data (kept in sync with the full site) ---- */
+const UTIL_DIR = [
+  {name:"Seattle City Light", type:"bpa", url:"https://www.seattle.gov/city-light", advisorUrl:"https://citylight.seattle.gov/energy-advisor-residential", advisorUrlBiz:"https://citylight.seattle.gov/energy-advisor-business", email:"SCLEnergyAdvisor@seattle.gov", phone:"206-684-3800", zips:[[98101,98199]]},
+  {name:"Tacoma Power", type:"bpa", url:"https://www.mytpu.org", advisorUrl:"https://www.mytpu.org/ways-to-save/", email:"rebates@tacoma.gov", emailBiz:"bizrebates@cityoftacoma.org", phone:"253-502-8363", zips:[[98401,98499]]},
+  {name:"Snohomish County PUD", type:"bpa", url:"https://www.snopud.com", advisorUrl:"https://www.snopud.com/save-energy/", phone:"425-783-1700 (Energy Hotline)", zips:[[98012,98012],[98020,98021],[98026,98026],[98036,98037],[98043,98043],[98082,98082],[98087,98087],[98201,98297]]},
+  {name:"Clark Public Utilities", type:"bpa", url:"https://www.clarkpublicutilities.com", advisorUrl:"https://www.clarkpublicutilities.com/residential-customers/contact-energy-counselor/", phone:"360-992-3355", zips:[[98600,98699]]},
+  {name:"Cowlitz PUD", type:"bpa", url:"https://www.cowlitzpud.org", zips:[[98616,98616],[98626,98626],[98632,98632],[98645,98645]]},
+  {name:"Benton PUD", type:"bpa", url:"https://www.bentonpud.org", zips:[[99320,99320],[99336,99338],[99350,99353]]},
+  {name:"Franklin PUD", type:"bpa", url:"https://www.franklinpud.com", zips:[[99301,99302]]},
+  {name:"Eugene Water & Electric Board", type:"bpa", url:"https://www.eweb.org", advisorUrl:"https://www.eweb.org/your-public-utility/contact-us", zips:[[97401,97405],[97408,97408]]},
+  {name:"Springfield Utility Board", type:"bpa", url:"https://www.subutil.com", zips:[[97477,97478]]},
+  {name:"Idaho Falls Power", type:"bpa", url:"https://www.idahofallsidaho.gov", zips:[[83401,83406]]},
+  {name:"Flathead Electric Cooperative", type:"bpa", url:"https://www.flatheadelectric.com", zips:[[59901,59937]]},
+  {name:"Puget Sound Energy", type:"iou", url:"https://www.pse.com", advisorUrl:"https://www.pse.com/en/rebates/ask-advisor-form", zips:[[98001,98011],[98014,98019],[98022,98025],[98027,98035],[98038,98042],[98045,98077],[98092,98092],[98310,98394],[98501,98599]]},
+  {name:"Avista Utilities", type:"iou", url:"https://www.myavista.com", zips:[[99201,99260]]},
+  {name:"Portland General Electric", type:"iou", url:"https://portlandgeneral.com", zips:[[97201,97299]]},
+  {name:"Idaho Power", type:"iou", url:"https://www.idahopower.com", zips:[[83701,83716]]},
+];
+function zipZone(z){
+  const p = Math.floor(z/100);
+  if (p >= 970 && p <= 975) return "HZ1";
+  if (p >= 976 && p <= 979) return "HZ2";
+  if (p >= 980 && p <= 986) return "HZ1";
+  if (p >= 988 && p <= 994) return "HZ2";
+  if (p === 834) return "HZ3";
+  if (p >= 830 && p <= 839) return "HZ2";
+  if (p >= 590 && p <= 599) return "HZ3";
+  return null;
+}
+function zipUtils(z){
+  return UTIL_DIR.map(u => { const r = (u.zips||[]).find(([lo,hi]) => z >= lo && z <= hi); return r ? {u, w:r[1]-r[0]} : null; })
+    .filter(Boolean).sort((a,b) => a.w-b.w).map(x => x.u);
+}
+const BLDG_SETS = {
+  sf:["Single Family","Any Residential","Any Residential (SF, MF or Manuf)"],
+  mh:["Manufactured Home","Any Residential","Any Residential (SF, MF or Manuf)"],
+  mflow:["Multifamily Low Rise","Multifamily","Any Residential","Any Residential (SF, MF or Manuf)"],
+  mfhigh:["Multifamily Mid/High Rise","Multifamily","Any Residential"],
+  offs:["Small Office <5,000 sq ft","Office, Warehouse, or Other"],
+  offm:["Medium Office 5,000 to 50,000 sq ft","Office, Warehouse, or Other"],
+  ret:["Medium Retail 5000 - 50,000 sq ft","Large Retail 50,000 - 100,000 sq ft"],
+  rest:["Restaurant"], school:["School K-12"], hosp:["Hospital"], lodg:["Lodging"],
+  wh:["Warehouse","Office, Warehouse, or Other"], oth:["Other","Office, Warehouse, or Other"],
+};
+const COM_COMMON = ["Any Commercial","Any Commercial Building",""];
+const CARDS = [
+  ["insulate","Insulation & sealing","Attic, walls, floors, air & duct sealing", m => ["Insulation","Air Sealing","Duct Sealing-Prescriptive","Duct Insulation","Door Sweeps"].includes(m.tech)],
+  ["hvac","Heating & cooling","Heat pumps, thermostats, HVAC upgrades", m => m.eu === "HVAC" && m.cat.indexOf("HVAC System") === 0],
+  ["windows","Windows","New or secondary efficient windows", m => /Window/.test(m.tech)],
+  ["water","Water heating","Heat pump water heaters & more", m => m.eu === "Water Heating" && !/Clothes/.test(m.tech)],
+  ["appl","Appliances & laundry","Efficient washers, dryers, plug loads", m => /Clothes/.test(m.tech) || m.eu === "Electronics"],
+  ["light","Lighting","LED fixtures, lamps & controls", m => m.eu === "Lighting"],
+  ["fridge","Refrigeration","Commercial refrigeration upgrades", m => m.eu === "Refrigeration"],
+  ["kitchen","Kitchen equipment","Commercial food-service equipment", m => m.eu === "Food Preparation"],
+  ["motors","Motors, pumps & drives","Motors, VFDs, process loads", m => m.eu === "Motors/Drives" || m.eu === "Process Loads"],
+  ["irr","Irrigation","Sprinkler hardware & system fixes", m => m.eu === "Irrigation"],
+  ["whole","Something else / whole building","Certified homes, reports & the rest", m => m.eu === "Whole Bldg/Meter Level" || /NEEM|New Homes|Home Energy Reports|EV Charger/.test(m.tech)],
+];
+
+/* ---- quiz state ---- */
+const S = { zip:"", utils:[], zone:null, sector:null, bldg:"any", vint:"existing", iq:false, cards:new Set(), sqft:null };
+
+function filtered(){
+  return DATA.filter(m => {
+    if (m.sec !== S.sector) return false;
+    if (S.zone && m.hz !== "All" && m.hz !== S.zone) return false;
+    if (S.bldg !== "any" && BLDG_SETS[S.bldg]){
+      const set = BLDG_SETS[S.bldg].concat(S.sector === "Commercial" ? COM_COMMON : [""]);
+      if (!set.includes(m.bldg)) return false;
+    }
+    if (S.vint === "existing"){ if (!(m.vint === "Existing" || m.vint === "New or Existing" || m.vint === "")) return false; }
+    else { if (!(m.vint === "New" || m.vint === "New or Existing" || m.vint === "New Construction" || m.vint === "")) return false; }
+    if (!S.iq && /^(IQ|LI)/.test(m.mtype||"")) return false;
+    return true;
+  });
+}
+/* One row per selected project type. Within a type, different technologies are
+   usually ALTERNATIVES (you install one kind of heat pump, not three), so only
+   the best option counts toward the total; the rest are shown as choices. */
+function techOption(tech, ms){
+  // score every variant by its estimated dollar amount, not its per-unit rate —
+  // $2/sq ft over 1,200 sq ft beats a $750 flat payment
+  const scored = ms.map(m => {
+    const area = /quare/i.test(m.unit||"");
+    const qty = area ? (S.sqft || 1000) : 1;
+    return {m, area, qty, amt: (m.pay||0)*qty};
+  }).sort((a,b) => b.amt - a.amt);
+  const s = scored[0];
+  return {tech, top: s.m, count: ms.length, area: s.area, qty: s.qty, amt: s.amt};
+}
+const fixUnit = u => (u||"per unit").toLowerCase().replace(/^per\s*/,"per ").replace("heap pump","heat pump");
+function cardRows(){
+  const p = filtered();
+  return CARDS.filter(c => S.cards.has(c[0])).map(c => {
+    const groups = {};
+    p.filter(c[3]).forEach(m => (groups[m.tech] = groups[m.tech] || []).push(m));
+    const options = Object.entries(groups).map(([t,ms]) => techOption(t,ms)).sort((a,b) => b.amt - a.amt);
+    if (!options.length) return null;
+    return {key:c[0], label:c[1], options, top:options[0], amt:options[0].amt};
+  }).filter(Boolean).sort((a,b) => b.amt - a.amt);
+}
+function needsArea(){
+  return cardRows().some(r => r.options.some(o => o.area));
+}
+
+/* ---- screens ---- */
+const bpaUtil = () => S.utils.find(u => u.type === "bpa") || null;
+const iouOnly = () => S.utils.length > 0 && !S.utils.some(u => u.type === "bpa");
+
+const SCREENS = [
+  {id:"welcome", show:() => true, render(){ return {
+    eyebrow:"Takes about a minute", title:"See what your utility might pay toward your energy project.",
+    sub:"Northwest utilities offer 1,100+ energy-efficiency incentives most customers never hear about — for insulation, heat pumps, windows and more. A few quick questions and we'll show you yours.",
+    body:`<div class="opts"><button class="opt" data-go><span>Let's go <small>No signup · nothing leaves your browser</small></span><span>→</span></button></div>`,
+  };}},
+  {id:"zip", show:() => true, render(){ return {
+    eyebrow:"Question 1", title:"What's your ZIP code?",
+    sub:"We use it to find your electric utility and your winter climate zone — both change what you qualify for.",
+    body:`<input class="bigzip" id="q-zip" inputmode="numeric" maxlength="5" placeholder="98118" value="${esc(S.zip)}" autocomplete="postal-code">
+          <p class="hintline"><button class="skip" data-skip>I'd rather not say — skip</button></p>`,
+    next:true, nextLabel:"Continue",
+    onNext(){ const v = $("#q-zip").value.trim();
+      if (/^\d{5}$/.test(v)){ S.zip = v; const z = parseInt(v,10); S.zone = zipZone(z); S.utils = zipUtils(z); }
+      return true; },
+  };}},
+  {id:"iou", show:() => iouOnly(), render(){ const u = S.utils[0]; return {
+    eyebrow:"Quick heads-up", title:`It looks like your utility is ${u.name}.`,
+    sub:"That's an investor-owned utility with its own rebate programs, separate from the BPA catalog this quiz uses. The amounts we show won't apply directly — but your results still make a great checklist to bring to their advisors.",
+    body:`<div class="notice warn">Check the utility name on your electric bill — if it's actually a public utility, PUD or co-op, the numbers here likely do apply.</div>`,
+    next:true, nextLabel:"Got it — keep going",
+  };}},
+  {id:"zone", show:() => !S.zone, render(){ return {
+    eyebrow:"Question 2", title:"How cold are your winters?",
+    sub:"Colder climates save more energy, so they qualify for bigger incentives.",
+    body: opts([["HZ1","Milder","Puget Sound, Portland, Willamette Valley, the coast"],["HZ2","Colder","Central/Eastern Washington & Oregon, Southern Idaho"],["HZ3","Coldest","Montana, mountain & high-elevation towns"],[null,"Not sure","We'll show every climate's offers"]], v => { S.zone = v; }),
+  };}},
+  {id:"sector", show:() => true, render(){ return {
+    eyebrow:"About you", title:"Which best describes this project?",
+    body: opts([["Residential","My home","House, manufactured home, apartment or condo"],["Commercial","My business or building","Office, shop, restaurant, school…"],["Agricultural","My farm","Irrigation and ag equipment"],["Industrial","An industrial facility","Plants and process loads"]], v => { S.sector = v; if (v!=="Residential"){ S.iq=false; } if (v==="Agricultural"||v==="Industrial") S.bldg="any"; }),
+  };}},
+  {id:"bldg-res", show:() => S.sector === "Residential", render(){ return {
+    eyebrow:"About your home", title:"What kind of home is it?",
+    body: opts([["sf","Single-family house",""],["mh","Manufactured home",""],["mflow","Apartment / condo — 3 stories or fewer",""],["mfhigh","Apartment / condo — 4+ stories",""],["any","Not sure",""]], v => { S.bldg = v; }),
+  };}},
+  {id:"bldg-com", show:() => S.sector === "Commercial", render(){ return {
+    eyebrow:"About your building", title:"What kind of building is it?",
+    body: opts([["offs","Small office","under 5,000 sq ft"],["offm","Medium office","5,000–50,000 sq ft"],["ret","Retail store",""],["rest","Restaurant",""],["school","School (K-12)",""],["hosp","Hospital / healthcare",""],["lodg","Hotel / lodging",""],["wh","Warehouse",""],["oth","Other / not sure",""]], v => { S.bldg = v; }),
+  };}},
+  {id:"vint", show:() => true, render(){ return {
+    eyebrow:"One more detail", title:"Is the building already built?",
+    body: opts([["existing","Yes — it's an existing building","Upgrading or replacing something"],["new","No — new construction","Being built right now or soon"]], v => { S.vint = v; }),
+  };}},
+  {id:"iq", show:() => S.sector === "Residential", render(){ return {
+    eyebrow:"Worth asking", title:"Want to see income-qualified offers too?",
+    sub:"Many utilities pay far more for income-qualified households — up to $6,000 toward a heat pump. Each utility sets its own rules, and asking costs nothing.",
+    body: opts([[true,"Yes, include them","We'll mark them so you know to ask"],[false,"No thanks",""]], v => { S.iq = v; }),
+  };}},
+  {id:"cards", show:() => true, render(){
+    const p = filtered();
+    const items = CARDS.map(c => ({c, n: p.filter(c[3]).length})).filter(x => x.n > 0);
+    return {
+      eyebrow:"Your project", title:"What are you thinking about doing?",
+      sub:"Pick as many as you like.",
+      body:`<div class="opts">` + items.map(({c,n}) =>
+        `<button class="opt" data-multi="${c[0]}" aria-pressed="${S.cards.has(c[0])}"><span>${esc(c[1])}<small>${esc(c[2])}</small></span><span class="tick">✓</span></button>`).join("") + `</div>`,
+      next:true, nextLabel:"See my results", nextNeeds:() => S.cards.size > 0,
+    };
+  }},
+  {id:"sqft", show:() => needsArea(), render(){ return {
+    eyebrow:"Last question", title:"Roughly how big is the area you'd insulate or cover?",
+    sub:"A wild guess is fine — a typical attic is 1,000–1,500 sq ft. You can refine it later with your contractor.",
+    body:`<input class="bigzip" id="q-sqft" inputmode="numeric" maxlength="6" placeholder="1000" value="${S.sqft || ""}" style="max-width:280px"><p class="hintline">square feet</p>`,
+    next:true, nextLabel:"See my results",
+    onNext(){ const v = parseInt(($("#q-sqft").value||"").replace(/,/g,""),10); S.sqft = (v >= 20 && v <= 100000) ? v : 1000; return true; },
+  };}},
+  {id:"results", show:() => true, render:renderResults, final:true},
+];
+
+function opts(list, set){
+  return `<div class="opts">` + list.map(([v,label,small]) =>
+    `<button class="opt" data-pick="${v === null ? "" : v}"><span>${esc(label)}${small ? `<small>${esc(small)}</small>` : ""}</span><span>→</span></button>`).join("") + `</div>`;
+}
+
+/* ---- results screen ---- */
+function renderResults(){
+  const rows = cardRows();
+  const total = rows.reduce((s,r) => s + r.amt, 0);
+  const u = bpaUtil();
+  const iou = iouOnly() ? S.utils[0] : null;
+  const em = u ? ((S.sector !== "Residential" && u.emailBiz) ? u.emailBiz : u.email) : null;
+  const utilName = u ? u.name : (iou ? iou.name : "your utility");
+  const rate = o => `${money(o.top.pay)} ${esc(fixUnit(o.top.unit))}${o.area ? ` × ${o.qty.toLocaleString()} sq ft` : ""}`;
+  let body = "";
+  if (!rows.length){
+    body = `<p class="q-sub">No currently-active measures match that combination — but that doesn't mean no help exists. Utilities also run <b>custom projects</b> for anything unusual. Contact ${esc(utilName)} and describe your project.</p>`;
+  } else {
+    body += `<div class="total mono">up to ${money(total)}</div>
+      <p class="total-cap">in BPA-backed incentives${u ? ` through <b>${esc(u.name)}</b>` : ""} · best option counted per project type · ${META.version} catalog${iou ? " · ⚠ your utility runs separate programs — treat this as a checklist" : ""}</p>`;
+    rows.forEach(r => {
+      const iqBadge = /^(IQ|LI)/.test(r.top.top.mtype||"") ? " · income-qualified rate" : "";
+      body += `<div class="rrow">
+        <div class="rline"><b>${esc(r.label)}</b><span class="amt">up to ${money(r.amt)}</span></div>
+        <div class="rdetail">Best option: ${esc(r.top.tech)} — ${rate(r.top)}${iqBadge} · <span class="ref mono">UES ${esc(r.top.top.id)}</span></div>
+        ${r.options.length > 1 ? `<details class="vars"><summary>${r.options.length - 1} other option${r.options.length > 2 ? "s" : ""} in this category</summary><ul>` +
+          r.options.slice(1, 8).map(o => `<li>${esc(o.tech)} — up to ${money(o.amt)} (<span class="mono">${esc(o.top.id)}</span>)</li>`).join("") + `</ul></details>` : ""}
+      </div>`;
+    });
+    body += `<div class="notice warn" style="margin-top:20px"><b>The one rule:</b> contact your utility and get the paperwork approved <b>before</b> any work starts. Amounts are BPA reference payments to utilities — ${esc(utilName)} sets your final rebate. Exact rates vary by equipment specs; the full site lists every variant.</div>`;
+  }
+  body += `<div class="contactbox">
+    <p><b>Ready?</b> ${u ? `Send this to ${esc(u.name)}'s energy team${em ? ` (<span class="mono">${esc(em)}</span>)` : ""}${u.phone ? ` or call ${esc(u.phone)}` : ""}.` : iou ? `Bring it to <a href="${iou.advisorUrl || iou.url}" target="_blank" rel="noopener">${esc(iou.name)}'s advisors</a>.` : "Add your details and send it to the utility named on your electric bill."}</p>
+    <div class="frow"><input type="text" id="c-name" placeholder="Your name (optional)" autocomplete="name"><input type="email" id="c-email" placeholder="Email (optional)" autocomplete="email"></div>
+    <div class="actrow">
+      ${rows.length ? `<button class="next" id="act-email">Email my results</button>
+      <button class="ghost" id="act-copy">Copy summary</button>` : ""}
+      <a class="ghost" href="../${permalink()}">Fine-tune on the full site</a>
+      <button class="ghost" id="act-restart">Start over</button>
+    </div>
+    <div class="outbox" id="out" hidden></div>
+  </div>`;
+  return { eyebrow:"Your results", title: rows.length ? "Here's what's on the table." : "No exact matches — but ask anyway.", body };
+}
+function permalink(){
+  const p = new URLSearchParams();
+  if (S.sector && S.sector !== "Residential") p.set("s", S.sector);
+  if (S.bldg !== "any") p.set("b", S.bldg);
+  if (S.zone) p.set("z", S.zone);
+  if (S.vint !== "existing") p.set("v", S.vint);
+  if (S.iq) p.set("iq","1");
+  const techs = new Set(); const p2 = filtered();
+  CARDS.forEach(c => { if (S.cards.has(c[0])) p2.filter(c[3]).forEach(m => techs.add(m.tech)); });
+  if (techs.size) p.set("t", [...techs].join("~"));
+  if (S.zip) p.set("zip", S.zip);
+  return "#" + p.toString();
+}
+function summaryText(){
+  const rows = cardRows();
+  const total = rows.reduce((s,r) => s + r.amt, 0);
+  const u = bpaUtil();
+  const L = [];
+  L.push("ENERGY EFFICIENCY PROJECT INQUIRY");
+  L.push("Prepared with WattsAvailable (https://pathxd.github.io/wattsavailable/) · " + new Date().toLocaleDateString("en-US") + "\n");
+  L.push("Hello — I'm a customer interested in starting an energy-efficiency project.");
+  L.push("I have NOT started any work, and I understand utility approval comes first.\n");
+  L.push("CUSTOMER");
+  L.push("  Name:  " + (($("#c-name")||{}).value || "—"));
+  L.push("  Email: " + (($("#c-email")||{}).value || "—"));
+  if (S.zip) L.push("  ZIP:   " + S.zip);
+  L.push("  Utility: " + (u ? u.name : "(as named on my bill)") + "\n");
+  L.push("BUILDING");
+  L.push("  " + S.sector + " · " + (S.vint === "existing" ? "Existing building" : "New construction") + (S.zone ? " · BPA Heating " + S.zone.replace("HZ","Zone ") : "") + "\n");
+  L.push("MEASURES OF INTEREST — per BPA UES Measures List (" + META.version + ")");
+  rows.forEach((r,i) => {
+    const o = r.top;
+    L.push("  " + (i+1) + ". " + r.label + " — best option: " + o.tech);
+    L.push("     UES Ref: " + o.top.id + " · " + money(o.top.pay) + " " + fixUnit(o.top.unit) + (o.area ? " × ~" + o.qty.toLocaleString() + " sq ft (rough estimate)" : "") + "  →  up to " + money(r.amt));
+    if (r.options.length > 1) L.push("     (also interested in: " + r.options.slice(1,4).map(x => x.tech).join(", ") + ")");
+  });
+  L.push("");
+  L.push("  ESTIMATED TOTAL (BPA reference payments): up to " + money(total) + "\n");
+  L.push("QUESTIONS FOR YOUR TEAM");
+  L.push("  1. Do you offer these measures (or equivalents), and at what customer rebate?");
+  L.push("  2. Should any of this run as a custom project instead?");
+  L.push("  3. What paperwork needs approval before work can begin?");
+  L.push("  4. Do you have approved/certified contractors?\n");
+  L.push("Ref: BPA Implementation Manual & UES Measures List");
+  L.push("https://www.bpa.gov/energy-and-services/conservation/implementation-manual");
+  L.push("Amounts are BPA-to-utility reference payments, not customer quotes; the final offer is the utility's.");
+  return L.join("\n");
+}
+
+/* ---- engine ---- */
+let idx = 0;
+const hist = [];
+function visibleScreens(){ return SCREENS.filter(s => s.show()); }
+function go(delta){
+  if (delta > 0){ hist.push(idx); idx = nextIdx(idx); }
+  else if (hist.length){ idx = hist.pop(); }
+  render();
+}
+function nextIdx(from){
+  for (let i = from + 1; i < SCREENS.length; i++) if (SCREENS[i].show()) return i;
+  return SCREENS.length - 1;
+}
+function render(){
+  const s = SCREENS[idx];
+  const r = s.render();
+  const shown = SCREENS.slice(0, idx + 1).filter(x => x.show()).length;
+  const totalShown = SCREENS.filter(x => x.show()).length;
+  $("#bar").style.width = Math.round(100 * (shown - 1) / Math.max(1, totalShown - 1)) + "%";
+  let html = "";
+  if (r.eyebrow) html += `<p class="q-eyebrow">${esc(r.eyebrow)}</p>`;
+  html += `<h1>${r.title}</h1>`;
+  if (r.sub) html += `<p class="q-sub">${r.sub}</p>`;
+  html += r.body || "";
+  html += `<div class="nav">` +
+    (hist.length ? `<button class="back" data-back>← Back</button>` : `<span></span>`) +
+    (r.next ? `<button class="next" data-next ${r.nextNeeds && !r.nextNeeds() ? "disabled" : ""}>${esc(r.nextLabel || "Continue")}</button>` : `<span></span>`) +
+    `</div>`;
+  $("#screen").innerHTML = html;
+  wire(s, r);
+  window.scrollTo({top:0});
+}
+function wire(s, r){
+  const el = $("#screen");
+  el.querySelectorAll("[data-back]").forEach(b => b.onclick = () => go(-1));
+  el.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(1));
+  el.querySelectorAll("[data-skip]").forEach(b => b.onclick = () => go(1));
+  el.querySelectorAll("[data-next]").forEach(b => b.onclick = () => { if (r.onNext && r.onNext() === false) return; go(1); });
+  el.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => {
+    const raw = b.dataset.pick;
+    const v = raw === "" ? null : raw === "true" ? true : raw === "false" ? false : raw;
+    // find the setter via re-render of this screen's list definition: setters are bound in render closures
+    if (s.id === "zone") S.zone = v;
+    else if (s.id === "sector"){ S.sector = v; if (v !== "Residential") S.iq = false; if (v === "Agricultural" || v === "Industrial") S.bldg = "any"; else S.bldg = "any"; S.cards.clear(); }
+    else if (s.id === "bldg-res" || s.id === "bldg-com") S.bldg = v;
+    else if (s.id === "vint") S.vint = v;
+    else if (s.id === "iq") S.iq = v === true;
+    go(1);
+  });
+  el.querySelectorAll("[data-multi]").forEach(b => b.onclick = () => {
+    const k = b.dataset.multi;
+    S.cards.has(k) ? S.cards.delete(k) : S.cards.add(k);
+    b.setAttribute("aria-pressed", S.cards.has(k));
+    const nb = el.querySelector("[data-next]");
+    if (nb) nb.disabled = S.cards.size === 0;
+  });
+  const zipIn = $("#q-zip");
+  if (zipIn){ zipIn.focus(); zipIn.onkeydown = e => { if (e.key === "Enter") el.querySelector("[data-next]").click(); }; }
+  const sqIn = $("#q-sqft");
+  if (sqIn){ sqIn.focus(); sqIn.onkeydown = e => { if (e.key === "Enter") el.querySelector("[data-next]").click(); }; }
+  if (s.id === "results"){
+    const emailBtn = $("#act-email");
+    if (emailBtn) emailBtn.onclick = () => {
+      const u = bpaUtil();
+      const em = u ? ((S.sector !== "Residential" && u.emailBiz) ? u.emailBiz : u.email) : null;
+      const text = summaryText();
+      $("#out").hidden = false; $("#out").textContent = text;
+      location.href = "mailto:" + (em ? encodeURIComponent(em) : "") + "?subject=" + encodeURIComponent("Energy efficiency project inquiry") + "&body=" + encodeURIComponent(text);
+    };
+    const copyBtn = $("#act-copy");
+    if (copyBtn) copyBtn.onclick = async () => {
+      const text = summaryText();
+      $("#out").hidden = false; $("#out").textContent = text;
+      try { await navigator.clipboard.writeText(text); copyBtn.textContent = "Copied ✓"; }
+      catch(e){ copyBtn.textContent = "Select & copy above"; }
+      setTimeout(() => copyBtn.textContent = "Copy summary", 2500);
+    };
+    const rs = $("#act-restart");
+    if (rs) rs.onclick = () => { location.hash = ""; location.reload(); };
+  }
+}
+render();
+})();
+</script>
+</body>
+</html>

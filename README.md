@@ -7,13 +7,18 @@ project, and generate a ready-to-send inquiry — citing the exact UES reference
 numbers utility program staff use — to kick off the paperwork **before** the
 project starts.
 
-**Live site:** https://pathxd.github.io/wattsavailable/
+**Live site (A — full estimator):** https://pathxd.github.io/wattsavailable/
+**Live site (B — quiz, for A/B testing):** https://pathxd.github.io/wattsavailable/quiz/
 Preview artifact: https://claude.ai/code/artifact/61cbfc65-c645-4f3f-8d35-d37136a8a7c9
 
 ## How it works
 
-- `index.html` — the entire site (UI, styling, matching logic). No framework,
+- `index.html` — version A: the full single-page estimator. No framework,
   no build step, no backend. Loads the measure catalog from `data/measures.js`.
+- `quiz/index.html` — version B: a TurboTax-style one-question-at-a-time quiz
+  built after user feedback that A felt too complex. Same data file, same
+  advisor routing; results show "up to" amounts with the best option counted
+  per project type. Share the two URLs separately to A/B test.
 - `data/measures.js` — 1,171 active UES measures extracted from BPA's official
   UES Measures List (April 2026, effective 2026-04-01). Expired measures and
   measures without a published payment are filtered out.
