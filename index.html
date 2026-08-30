@@ -281,7 +281,7 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
         <input type="text" id="zip" inputmode="numeric" maxlength="5" placeholder="e.g. 98118" autocomplete="postal-code">
       </div>
       <div class="field" style="flex:2.2">
-        <div class="ziphint" id="zip-result">Enter your ZIP and we'll suggest your electric utility and set your climate zone. (If you also have a natural-gas utility, note these incentives cover <b>electric</b> savings — your gas utility may run separate rebates.)</div>
+        <div class="ziphint" id="zip-result">Enter your ZIP and we'll suggest your electric utility and set your winter climate zone (colder zones qualify for more). No ZIP? We'll assume the milder Zone&nbsp;1 climate, which is the conservative estimate. (If you also have a natural-gas utility, note these incentives cover <b>electric</b> savings — your gas utility may run separate rebates.)</div>
       </div>
     </div>
     <div class="fieldrow">
@@ -301,13 +301,6 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
           <option value="existing">Existing building (retrofit)</option>
           <option value="new">New construction</option>
         </select>
-      </div>
-    </div>
-    <div class="fieldrow">
-      <div class="field" style="flex:2">
-        <label>Winter climate (BPA heating zone) <span id="zone-note" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--good)"></span></label>
-        <div class="seg" id="zone-seg" role="group" aria-label="Heating zone"></div>
-        <p class="zonehelp" id="zone-help"><b>Zone 1</b> — milder winters: Puget Sound, Portland metro, Willamette Valley, the coast. <b>Zone 2</b> — colder: Central &amp; Eastern Washington and Oregon, Southern Idaho. <b>Zone 3</b> — coldest: Montana, high-elevation and mountain communities.</p>
       </div>
     </div>
     <label class="check" id="iq-row">
@@ -340,7 +333,7 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
 
   <div class="panel">
     <div class="panel-head"><span class="stepnum">STEP 3</span><h2>Matching measures &amp; your estimate</h2></div>
-    <p class="hint">Dollar figures are <b>BPA’s reference payment to your utility</b> per unit installed — a strong signal of what your utility’s rebate could look like, not a guarantee. Enter your project size and add measures to build an estimate.</p>
+    <p class="hint">Dollar figures are <b>BPA’s reference payments to your utility</b> per unit installed — useful for planning, but <b>not a guarantee of anything</b>. Your utility alone decides which measures it offers, at what amounts, and under what conditions; some utilities won’t offer a listed measure at all. Each reference number links to the <a href="https://www.bpa.gov/energy-and-services/conservation/implementation-manual" target="_blank" rel="noopener">BPA Implementation Manual</a>, where the full terms and conditions live.</p>
     <div id="results" aria-live="polite"><p class="results-empty">Choose a project type above to see matching measures.</p></div>
   </div>
 
@@ -353,9 +346,9 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
         <thead><tr><th>UES Ref №</th><th>Measure</th><th style="text-align:right">Qty</th><th style="text-align:right">Ref. payment</th><th></th></tr></thead>
         <tbody id="cart-body"></tbody>
       </table></div>
-      <div class="totline"><span>Estimated BPA reference payment</span><span class="mono" id="cart-total">$0</span></div>
+      <div class="totline"><span>Total BPA reference value — <em>not</em> a rebate quote</span><span class="mono" id="cart-total">$0</span></div>
       <div class="totline" style="font-weight:400;color:var(--ink-soft);font-size:13.5px"><span>Estimated energy saved · rough bill savings at 11¢/kWh</span><span class="mono" id="cart-kwh"></span></div>
-      <div class="callout"><b>Before you send:</b> incentive paperwork must be approved by your utility <b>before any work starts</b>. Your utility chooses which measures it offers and sets the final customer amount — it may also have better offers than what’s listed here.</div>
+      <div class="callout"><b>No guarantees:</b> these are BPA’s reference payments to utilities, not offers to you. Your utility alone decides which measures it offers (possibly none of these), at what amounts, and under what conditions — it may also have better offers than what’s listed here. And incentive paperwork must be approved by your utility <b>before any work starts</b>.</div>
       <form id="leadform" onsubmit="return false">
         <div class="fieldrow">
           <div class="field"><label for="f-name">Your name</label><input type="text" id="f-name" autocomplete="name"></div>
@@ -464,7 +457,7 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
 
 <div class="cartbar" id="cartbar">
   <div class="wrap">
-    <div class="sum"><span id="bar-n"></span> · est. BPA reference payment <b id="bar-total">$0</b></div>
+    <div class="sum"><span id="bar-n"></span> · BPA reference value <b id="bar-total">$0</b> · final amounts set by your utility</div>
     <a class="btn btn-primary" href="#step4">Prepare my utility request ↓</a>
   </div>
 </div>
@@ -475,6 +468,7 @@ footer .fine{margin-top:26px;padding-top:18px;border-top:1px solid var(--mist);m
 "use strict";
 const DATA = window.UES_DATA || [];
 const META = window.UES_META || {version:"April 2026", count:DATA.length};
+const IM_URL = "https://www.bpa.gov/energy-and-services/conservation/implementation-manual";
 
 /* ---------------- config ---------------- */
 const SECTORS = ["Residential","Commercial","Agricultural","Industrial"];
@@ -689,13 +683,8 @@ function renderBldg(){
   $("bldg-sel").innerHTML = opts.map(o => `<option value="${o[0]}" ${o[0]===state.bldg?"selected":""}>${esc(o[1])}</option>`).join("");
   $("iq-row").style.display = state.sector === "Residential" ? "" : "none";
 }
-function renderZones(){
-  $("zone-seg").innerHTML = ZONES.map(z =>
-    `<button type="button" aria-pressed="${z[0]===state.zone}" data-z="${z[0]}">${z[1]}</button>`).join("");
-  $("zone-seg").querySelectorAll("button").forEach(b => b.onclick = () => { state.zone = b.dataset.z; state.zoneAuto = false; update(); });
-  $("zone-note").textContent = state.zoneAuto ? "· set from your ZIP — change it if that looks wrong" : "";
-  $("zone-help").style.display = state.zoneAuto ? "none" : "";
-}
+/* The heating zone is derived from the ZIP (defaults to the milder Zone 1
+   when no ZIP is given) — there is no manual zone input. */
 
 /* ---------------- zip lookup ---------------- */
 function onZip(setZone){
@@ -709,7 +698,7 @@ function onZip(setZone){
   const zone = zipZone(z);
   if (setZone !== false && zone){ state.zone = zone; state.zoneAuto = true; }
   const cands = zipUtils(z);
-  const zoneTxt = zone ? `Climate set to <b>Heating ${zone.replace("HZ","Zone ")}</b> (change below if that looks wrong).` : "";
+  const zoneTxt = zone ? `Winter climate set to <b>Heating ${zone.replace("HZ","Zone ")}</b> for your area.` : "";
   if (!cands.length){
     out.innerHTML = `<div class="zipcard">We don't recognize that ZIP — check the utility name on your electric bill and type it in Step 4. ${zoneTxt}<span class="gas">Gas utility too? These incentives cover electric savings; your gas utility may run separate rebates.</span></div>`;
   } else {
@@ -842,7 +831,7 @@ function renderResults(){
       const kb = kwhBadge(m); if (kb) badges.push(kb);
       html += `<div class="mrow">
         <div class="minfo">
-          <div class="mref mono">${esc(m.id)}</div>
+          <div class="mref mono"><a href="${IM_URL}" target="_blank" rel="noopener" title="Look up this measure's full terms in the BPA Implementation Manual & UES Measures List">${esc(m.id)} ↗</a></div>
           <div class="mname">${esc(measureName(m))}</div>
           <div class="mdetail">${esc(measureSub(m))}</div>
           <div class="badges">${badges.join("")}</div>
@@ -890,7 +879,7 @@ function renderCart(){
   if (!has) return;
   $("cart-body").innerHTML = [...cart.values()].map(({m, qty}) => `
     <tr>
-      <td class="mono">${esc(m.id)}</td>
+      <td class="mono"><a href="${IM_URL}" target="_blank" rel="noopener" title="Full terms in the BPA Implementation Manual">${esc(m.id)}</a></td>
       <td><b>${esc(m.tech)}</b><br><span style="color:var(--ink-soft);font-size:12.5px">${esc(measureName(m))}</span></td>
       <td class="num">${qty.toLocaleString()} <span style="color:var(--ink-soft);font-size:11px">${esc(unitLabel(m.unit)).replace("per ","× ")}</span></td>
       <td class="num">${money((m.pay||0)*qty)}</td>
@@ -961,7 +950,8 @@ function buildSummary(){
     if (m.forms) L.push("     Forms noted in catalog: " + m.forms);
   });
   L.push("");
-  L.push("  ESTIMATED TOTAL BPA REFERENCE PAYMENT: " + money(t.pay));
+  L.push("  TOTAL BPA REFERENCE VALUE: " + money(t.pay) + " (reference only — NOT a rebate quote;");
+  L.push("  the utility decides which measures it offers and at what amounts)");
   L.push("  Estimated savings: ~" + Math.round(t.kwh).toLocaleString() + " kWh/yr\n");
   if ($("f-notes").value){ L.push("PROJECT NOTES"); L.push("  " + $("f-notes").value + "\n"); }
   L.push("QUESTIONS FOR YOUR TEAM");
@@ -1049,7 +1039,7 @@ function restoreFromHash(){
 
 function update(){
   state.shown = {};
-  renderSectors(); renderBldg(); renderZones(); renderCards(); renderChips(); renderResults(); renderCart(); renderRoute(); saveHash();
+  renderSectors(); renderBldg(); renderCards(); renderChips(); renderResults(); renderCart(); renderRoute(); saveHash();
 }
 $("stat-count").textContent = META.count.toLocaleString();
 $("foot-count").textContent = META.count.toLocaleString() + " active, with published payments";

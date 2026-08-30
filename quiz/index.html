@@ -186,9 +186,12 @@ const CARDS = [
 const S = { zip:"", utils:[], zone:null, sector:null, bldg:"any", vint:"existing", iq:false, cards:new Set(), sqft:null };
 
 function filtered(){
+  // No manual climate input: the zone comes from the ZIP, and without a ZIP we
+  // assume the milder Zone 1 — the conservative (lowest-paying) assumption.
+  const zone = S.zone || "HZ1";
   return DATA.filter(m => {
     if (m.sec !== S.sector) return false;
-    if (S.zone && m.hz !== "All" && m.hz !== S.zone) return false;
+    if (m.hz !== "All" && m.hz !== zone) return false;
     if (S.bldg !== "any" && BLDG_SETS[S.bldg]){
       const set = BLDG_SETS[S.bldg].concat(S.sector === "Commercial" ? COM_COMMON : [""]);
       if (!set.includes(m.bldg)) return false;
@@ -235,14 +238,14 @@ const iouOnly = () => S.utils.length > 0 && !S.utils.some(u => u.type === "bpa")
 const SCREENS = [
   {id:"welcome", show:() => true, render(){ return {
     eyebrow:"Takes about a minute", title:"See what your utility might pay toward your energy project.",
-    sub:"Northwest utilities offer 1,100+ energy-efficiency incentives most customers never hear about — for insulation, heat pumps, windows and more. A few quick questions and we'll show you yours.",
+    sub:"The BPA catalog behind Northwest utilities lists 1,100+ energy-efficiency incentives most customers never hear about — for insulation, heat pumps, windows and more. A few quick questions and we'll show you what may be available. (Your utility makes the final call on every incentive.)",
     body:`<div class="opts"><button class="opt" data-go><span>Let's go <small>No signup · nothing leaves your browser</small></span><span>→</span></button></div>`,
   };}},
   {id:"zip", show:() => true, render(){ return {
     eyebrow:"Question 1", title:"What's your ZIP code?",
     sub:"We use it to find your electric utility and your winter climate zone — both change what you qualify for.",
     body:`<input class="bigzip" id="q-zip" inputmode="numeric" maxlength="5" placeholder="98118" value="${esc(S.zip)}" autocomplete="postal-code">
-          <p class="hintline"><button class="skip" data-skip>I'd rather not say — skip</button></p>`,
+          <p class="hintline"><button class="skip" data-skip>I'd rather not say — skip</button> <span style="display:block;margin-top:4px">(Skipping assumes the mildest climate zone — the lowest reference values.)</span></p>`,
     next:true, nextLabel:"Continue",
     onNext(){ const v = $("#q-zip").value.trim();
       if (/^\d{5}$/.test(v)){ S.zip = v; const z = parseInt(v,10); S.zone = zipZone(z); S.utils = zipUtils(z); }
@@ -253,11 +256,6 @@ const SCREENS = [
     sub:"That's an investor-owned utility with its own rebate programs, separate from the BPA catalog this quiz uses. The amounts we show won't apply directly — but your results still make a great checklist to bring to their advisors.",
     body:`<div class="notice warn">Check the utility name on your electric bill — if it's actually a public utility, PUD or co-op, the numbers here likely do apply.</div>`,
     next:true, nextLabel:"Got it — keep going",
-  };}},
-  {id:"zone", show:() => !S.zone, render(){ return {
-    eyebrow:"Question 2", title:"How cold are your winters?",
-    sub:"Colder climates save more energy, so they qualify for bigger incentives.",
-    body: opts([["HZ1","Milder","Puget Sound, Portland, Willamette Valley, the coast"],["HZ2","Colder","Central/Eastern Washington & Oregon, Southern Idaho"],["HZ3","Coldest","Montana, mountain & high-elevation towns"],[null,"Not sure","We'll show every climate's offers"]], v => { S.zone = v; }),
   };}},
   {id:"sector", show:() => true, render(){ return {
     eyebrow:"About you", title:"Which best describes this project?",
@@ -307,9 +305,10 @@ function opts(list, set){
 }
 
 /* ---- results screen ---- */
+const IM_URL = "https://www.bpa.gov/energy-and-services/conservation/implementation-manual";
+const refLink = id => `<a class="ref mono" href="${IM_URL}" target="_blank" rel="noopener" title="Full terms & conditions in the BPA Implementation Manual">UES ${esc(id)} ↗</a>`;
 function renderResults(){
   const rows = cardRows();
-  const total = rows.reduce((s,r) => s + r.amt, 0);
   const u = bpaUtil();
   const iou = iouOnly() ? S.utils[0] : null;
   const em = u ? ((S.sector !== "Residential" && u.emailBiz) ? u.emailBiz : u.email) : null;
@@ -319,18 +318,21 @@ function renderResults(){
   if (!rows.length){
     body = `<p class="q-sub">No currently-active measures match that combination — but that doesn't mean no help exists. Utilities also run <b>custom projects</b> for anything unusual. Contact ${esc(utilName)} and describe your project.</p>`;
   } else {
-    body += `<div class="total mono">up to ${money(total)}</div>
-      <p class="total-cap">in BPA-backed incentives${u ? ` through <b>${esc(u.name)}</b>` : ""} · best option counted per project type · ${META.version} catalog${iou ? " · ⚠ your utility runs separate programs — treat this as a checklist" : ""}</p>`;
+    const biggest = rows[0].top; // rows are sorted by reference value
+    body += `<p class="total-cap" style="margin:0 0 4px">The most generous single measure that matched:</p>
+      <div class="total mono">up to ${money(rows[0].amt)}</div>
+      <p class="total-cap">BPA reference value · ${esc(biggest.tech)}${/^(IQ|LI)/.test(biggest.top.mtype||"") ? " (income-qualified rate)" : ""} · ${META.version} catalog${!S.zone ? " · mildest climate assumed" : ""}</p>
+      <div class="notice warn" style="margin:0 0 18px"><b>Important — these are not guarantees.</b> Figures are BPA's reference payments to utilities, not offers to you. <b>${esc(utilName)}</b> alone decides which measures it offers (possibly none of these), at what amounts, and under what conditions.${iou ? " Your utility runs its own separate programs, so treat this purely as a project checklist." : " The only way to know your actual rebate is to ask them — before any work starts."}</div>`;
     rows.forEach(r => {
       const iqBadge = /^(IQ|LI)/.test(r.top.top.mtype||"") ? " · income-qualified rate" : "";
       body += `<div class="rrow">
-        <div class="rline"><b>${esc(r.label)}</b><span class="amt">up to ${money(r.amt)}</span></div>
-        <div class="rdetail">Best option: ${esc(r.top.tech)} — ${rate(r.top)}${iqBadge} · <span class="ref mono">UES ${esc(r.top.top.id)}</span></div>
+        <div class="rline"><b>${esc(r.label)}</b><span class="amt">ref. up to ${money(r.amt)}</span></div>
+        <div class="rdetail">Most generous match: ${esc(r.top.tech)} — ${rate(r.top)}${iqBadge} · ${refLink(r.top.top.id)}</div>
         ${r.options.length > 1 ? `<details class="vars"><summary>${r.options.length - 1} other option${r.options.length > 2 ? "s" : ""} in this category</summary><ul>` +
-          r.options.slice(1, 8).map(o => `<li>${esc(o.tech)} — up to ${money(o.amt)} (<span class="mono">${esc(o.top.id)}</span>)</li>`).join("") + `</ul></details>` : ""}
+          r.options.slice(1, 8).map(o => `<li>${esc(o.tech)} — ref. up to ${money(o.amt)} · ${refLink(o.top.id)}</li>`).join("") + `</ul></details>` : ""}
       </div>`;
     });
-    body += `<div class="notice warn" style="margin-top:20px"><b>The one rule:</b> contact your utility and get the paperwork approved <b>before</b> any work starts. Amounts are BPA reference payments to utilities — ${esc(utilName)} sets your final rebate. Exact rates vary by equipment specs; the full site lists every variant.</div>`;
+    body += `<div class="notice" style="margin-top:20px">Reference values are shown per project type and deliberately never added together — real projects and utility offers vary too much for a meaningful total. Full terms for every measure: <a href="${IM_URL}" target="_blank" rel="noopener">BPA Implementation Manual</a>.</div>`;
   }
   body += `<div class="contactbox">
     <p><b>Ready?</b> ${u ? `Send this to ${esc(u.name)}'s energy team${em ? ` (<span class="mono">${esc(em)}</span>)` : ""}${u.phone ? ` or call ${esc(u.phone)}` : ""}.` : iou ? `Bring it to <a href="${iou.advisorUrl || iou.url}" target="_blank" rel="noopener">${esc(iou.name)}'s advisors</a>.` : "Add your details and send it to the utility named on your electric bill."}</p>
@@ -343,7 +345,7 @@ function renderResults(){
     </div>
     <div class="outbox" id="out" hidden></div>
   </div>`;
-  return { eyebrow:"Your results", title: rows.length ? "Here's what's on the table." : "No exact matches — but ask anyway.", body };
+  return { eyebrow:"Your results", title: rows.length ? "Here's what may be on the table." : "No exact matches — but ask anyway.", body };
 }
 function permalink(){
   const p = new URLSearchParams();
@@ -360,7 +362,6 @@ function permalink(){
 }
 function summaryText(){
   const rows = cardRows();
-  const total = rows.reduce((s,r) => s + r.amt, 0);
   const u = bpaUtil();
   const L = [];
   L.push("ENERGY EFFICIENCY PROJECT INQUIRY");
@@ -375,14 +376,15 @@ function summaryText(){
   L.push("BUILDING");
   L.push("  " + S.sector + " · " + (S.vint === "existing" ? "Existing building" : "New construction") + (S.zone ? " · BPA Heating " + S.zone.replace("HZ","Zone ") : "") + "\n");
   L.push("MEASURES OF INTEREST — per BPA UES Measures List (" + META.version + ")");
+  L.push("(BPA reference values only — I understand these are not offers or quotes,");
+  L.push(" and that the utility decides what it offers and at what amounts.)");
   rows.forEach((r,i) => {
     const o = r.top;
-    L.push("  " + (i+1) + ". " + r.label + " — best option: " + o.tech);
-    L.push("     UES Ref: " + o.top.id + " · " + money(o.top.pay) + " " + fixUnit(o.top.unit) + (o.area ? " × ~" + o.qty.toLocaleString() + " sq ft (rough estimate)" : "") + "  →  up to " + money(r.amt));
+    L.push("  " + (i+1) + ". " + r.label + " — e.g. " + o.tech);
+    L.push("     UES Ref: " + o.top.id + " · reference value " + money(o.top.pay) + " " + fixUnit(o.top.unit) + (o.area ? " × ~" + o.qty.toLocaleString() + " sq ft (rough estimate)" : ""));
     if (r.options.length > 1) L.push("     (also interested in: " + r.options.slice(1,4).map(x => x.tech).join(", ") + ")");
   });
   L.push("");
-  L.push("  ESTIMATED TOTAL (BPA reference payments): up to " + money(total) + "\n");
   L.push("QUESTIONS FOR YOUR TEAM");
   L.push("  1. Do you offer these measures (or equivalents), and at what customer rebate?");
   L.push("  2. Should any of this run as a custom project instead?");
